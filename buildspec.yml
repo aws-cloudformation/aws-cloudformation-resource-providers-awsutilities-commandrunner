@@ -1,0 +1,15 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+        java: openjdk8
+        python: 3.7
+    commands:
+      -  pip install pre-commit cloudformation-cli-java-plugin
+  build:
+    commands:
+      - pre-commit run --all-files
+    #   - cd "$CODEBUILD_SRC_DIR/my_resource"
+    #   - mvn clean verify --no-transfer-progress
+    # finally:
+    #   - cat "$CODEBUILD_SRC_DIR/my_resource/rpdk.log"
