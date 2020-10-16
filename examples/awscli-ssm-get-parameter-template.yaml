@@ -1,0 +1,12 @@
+Resources:
+    Command:
+        Type: AWSUtility::CloudFormation::CommandRunner
+        Properties:
+            Command: 'yum install jq -y && aws ssm get-parameter --name RepositoryName --region us-east-1 | jq -r .Parameter.Value > /command-output.txt'
+            Role: EC2AdminRole
+            LogGroup: my-cloudwatch-log-group
+Outputs:
+    Output:
+        Description: The output of the commandrunner.
+        Value: !GetAtt Command.Output
+    

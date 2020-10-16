@@ -1,0 +1,92 @@
+{
+    "typeName": "AWSUtility::CloudFormation::CommandRunner",
+    "description": "The AWSUtility::CloudFormation::CommandRunner resource runs any command provided to it before or after any Stack resource. The output of the command can be accessed by using Fn::GetAtt on the AWSUtility::CloudFormation::CommandRunner resource.",
+    "properties": {
+        "Command": {
+            "description": "The command to be run using the provided IAM role. Use '>' to output to the file /command-output.txt and it will be available when referencing this resource using Fn::Ref.",
+            "type": "string"
+        },
+        "Role": {
+            "description": "The IAM role used to run the specified command.",
+            "type": "string"
+        },
+        "LogGroup": {
+            "description": "The CloudWatch Log Group to stream the logs from the specified command.",
+            "type": "string"
+        },
+        "Output": {
+            "type": "string",
+            "description": "Output of the command that was executed."
+        },
+        "Id": {
+            "type": "string",
+            "description": "Id of the command executed [Read-Only]"
+        },
+        "SubnetId": {
+            "type": "string",
+            "description": "Id of the Subnet to execute the command in."
+        },
+        "KeyId": {
+            "type": "string",
+            "description": "Id of the KMS key to use when encrypting the output stored in SSM. If not specified, the account's default KMS key is used."
+        },
+        "SecurityGroupId": {
+            "type": "string",
+            "description": "Id of the Security Group to attach to the instance the command is run in. If using SecurityGroup, SubnetId is required."
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "Command"
+    ],
+    "readOnlyProperties": [
+        "/properties/Output",
+        "/properties/Id"
+    ],
+    "primaryIdentifier": [
+        "/properties/Id"
+    ],
+    "handlers": {
+        "create": {
+            "permissions": [
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSecurityGroups",
+                "ec2:CreateSecurityGroup",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:CreateTags",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RunInstances",
+                "ec2:DescribeInstances",
+                "ec2:TerminateInstances",
+                "ec2:DeleteSecurityGroup",
+                "cloudformation:DeleteStack",
+                "cloudformation:CreateStack",
+                "cloudformation:DescribeStacks",
+                "cloudwatch:CreateLogStream",
+                "cloudwatch:DescribeLogGroups",
+                "cloudwatch:PutMetricData",
+                "ssm:GetParameter",
+                "ssm:PutParameter",
+                "iam:PassRole",
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "sts:GetCallerIdentity",
+                "iam:SimulatePrincipalPolicy"
+            ]
+        },
+        "read": {
+            "permissions": [
+                "ssm:GetParameter",
+                "cloudwatch:PutMetricData"
+            ]
+        },
+        "delete": {
+            "permissions": [
+                "ssm:DeleteParameter"
+            ]
+        }
+    }
+}
