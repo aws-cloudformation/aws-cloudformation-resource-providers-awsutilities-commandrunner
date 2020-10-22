@@ -40,7 +40,7 @@ Resources:
         Type: AWS::S3::Bucket
         Properties:
             BucketName:
-                Fn::Ref: BucketName
+                Ref: BucketName
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: FALSE
             WebsiteConfiguration:
@@ -51,7 +51,7 @@ Resources:
         Type: AWS::S3::BucketPolicy
         Properties:
             Bucket:
-                Fn::Ref: S3Bucket
+                Ref: S3Bucket
             PolicyDocument:
                 Statement:
                   - Sid: PublicReadGetObject
