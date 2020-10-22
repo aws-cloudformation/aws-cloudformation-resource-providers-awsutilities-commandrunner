@@ -1,0 +1,202 @@
+{
+  "Parameters": {
+    "SubnetId": {
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "AMIId": {
+      "Type": "String",
+      "Default": "ami-062f7200baf2fa504"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Default": "t2.medium"
+    },
+    "IamInstanceProfile": {
+      "Type": "String",
+      "Default": "empty"
+    },
+    "SecurityGroupId": {
+      "Type": "String",
+      "Default": "empty"
+    },
+    "VpcId": {
+      "Type": "String",
+      "Default": "empty"
+    },
+    "Command": {
+      "Type": "String",
+      "Default": "yum install jq -y && aws ssm get-parameter --name RepositoryName --region us-east-1 | jq -r .Parameter.Value > /commandrunner-output.txt"
+    },
+    "LogGroup": {
+      "Type": "String",
+      "Default": "cloudformation-commandrunner-log-group"
+    }
+  },
+  "Conditions": {
+    "CreateSecurityGroup": {
+      "Fn::Equals": [
+        {
+          "Ref": "SecurityGroupId"
+        },
+        "empty"
+      ]
+    },
+    "UseInstanceProfile": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "IamInstanceProfile"
+            },
+            "empty"
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "SecurityGroup": {
+      "Condition": "CreateSecurityGroup",
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupName": {
+          "Fn::Sub": "aws-cloudformation-commandrunner-temp-sg-${AWS::StackName}}"
+        },
+        "GroupDescription": "A temporary security group for AWS::CloudFormation::Command",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": -1,
+            "IpProtocol": -1,
+            "ToPort": -1
+          }
+        ],
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    },
+    "EC2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "yum": {
+                "awslogs": []
+              }
+            },
+            "files": {
+              "/etc/awslogs/awslogs.conf": {
+                "content": {
+                  "Fn::Sub": "[general]\nstate_file= /var/awslogs/state/agent-state\n[/var/log/cloud-init.log]\nfile = /var/log/cloud-init.log\\n\nlog_group_name = ${LogGroup}\nlog_stream_name = {instance_id}/cloud-init.log\n[/var/log/cloud-init-output.log]\nfile = /var/log/cloud-init-output.log\nlog_group_name = ${LogGroup}\nlog_stream_name = {instance_id}/cloud-init-output.log\n[/var/log/cfn-init.log]\nfile = /var/log/cfn-init.log\nlog_group_name = ${LogGroup}\nlog_stream_name = {instance_id}/cfn-init.log\n[/var/log/cfn-hup.log]\nfile = /var/log/cfn-hup.log\nlog_group_name = ${LogGroup}\nlog_stream_name = {instance_id}/cfn-hup.log\n[/var/log/cfn-wire.log]\nfile = /var/log/cfn-wire.log\nlog_group_name = ${LogGroup}\nlog_stream_name = {instance_id}/cfn-wire.log\n"
+                },
+                "mode": "000444",
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/awslogs/awscli.conf": {
+                "content": {
+                  "Fn::Sub": "[plugins]\ncwlogs = cwlogs\n[default]\nregion = ${AWS::Region}\n"
+                },
+                "mode": "000444",
+                "owner": "root",
+                "group": "root"
+              }
+            },
+            "commands": {
+              "01_create_state_directory": {
+                "command": "mkdir -p /var/awslogs/state"
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "awslogsd": {
+                  "enabled": true,
+                  "ensureRunning": true,
+                  "files": [
+                    "/etc/awslogs/awslogs.conf"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Sub": "#!/bin/bash\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region}\n${Command}\n/opt/aws/bin/cfn-signal -r 'Command ran successfully.' -e 0 --id 'Command Output' --data \"$(cat /command-output.txt)\" '${WaitConditionHandle}'\n"
+          }
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroupIds": [
+          {
+            "Fn::If": [
+              "CreateSecurityGroup",
+              {
+                "Ref": "SecurityGroup"
+              },
+              {
+                "Ref": "SecurityGroupId"
+              }
+            ]
+          }
+        ],
+        "ImageId": {
+          "Ref": "AMIId"
+        },
+        "SubnetId": {
+          "Ref": "SubnetId"
+        },
+        "IamInstanceProfile": {
+          "Fn::If": [
+            "UseInstanceProfile",
+            {
+              "Ref": "IamInstanceProfile"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        }
+      }
+    },
+    "WaitConditionHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "WaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Properties": {
+        "Count": 1,
+        "Handle": {
+          "Ref": "WaitConditionHandle"
+        },
+        "Timeout": 600
+      }
+    }
+  },
+  "Outputs": {
+    "Result": {
+      "Description": "The output of the commandrunner.",
+      "Value": {
+        "Fn::Select": [
+          3,
+          {
+            "Fn::Split": [
+              "\"",
+              {
+                "Fn::GetAtt": [
+                  "WaitCondition",
+                  "Data"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
