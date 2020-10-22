@@ -75,7 +75,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                     .toString();
             String stackName           = "AWSUtility-CloudFormation-CommandRunner-"+generatedString;
-            
+
             try {
 
                 //Check if TerminateInstances is allowed

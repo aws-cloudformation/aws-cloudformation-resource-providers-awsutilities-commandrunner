@@ -8,5 +8,5 @@ Resources:
 Outputs:
     Output:
         Description: The output of the commandrunner.
-        Value: !GetAtt Command.Output
-    
+        Value:
+            Fn::GetAtt: Command.Output

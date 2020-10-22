@@ -10,11 +10,11 @@ do
         --region)
            region=$2
            ;;
-#        --bucket-name) 
+#        --bucket-name)
 ##          echo "Bucket name provided is" $2
 #           bucket_name=$2
 #           ;;
-         --*) 
+         --*)
             echo "Not an option $1"
             ;;
 #        *) echo "argument $1"

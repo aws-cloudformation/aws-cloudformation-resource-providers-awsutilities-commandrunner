@@ -1,68 +1,74 @@
 Parameters:
-    BucketName: 
+    BucketName:
         Type: String
 
 Resources:
     CommandRunner:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
-            Command: !Sub | 
-                sudo su
-                cd /home/ec2-user/
-                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-                export NVM_DIR="$HOME/.nvm"
-                [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
-                [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  
-                nvm --version
-                nvm install node
-                npm install -g gatsby-cli
-                yum install git -y
-                gatsby new gatsby-starter-portfolio-cara https://github.com/LekoArts/gatsby-starter-portfolio-cara
-                cd /home/ec2-user/gatsby-starter-portfolio-cara/src/@lekoarts/gatsby-theme-cara/sections/
-                echo '# Congratulations!' > intro.mdx
-                echo '' >> intro.mdx
-                echo 'You can now run Bash commands in your CloudFormation Stacks.' >> intro.mdx
-                cd /home/ec2-user/gatsby-starter-portfolio-cara/node_modules/@lekoarts/gatsby-theme-cara/src/templates/
-                sed -i 's/5/1/g' cara.tsx
-                cd /home/ec2-user/gatsby-starter-portfolio-cara/
-                sed -i 's/Cara - Gatsby Starter Portfolio/CommandRunner/g' gatsby-config.js 
-                gatsby build
-                cd public
-                aws s3 sync . s3://${S3Bucket}
-                #aws s3api put-bucket-website --bucket ${S3Bucket} --website-configuration '{"IndexDocument":{"Suffix":"index.html"}}'
-                #aws s3api put-bucket-policy --policy '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::'"${S3Bucket}"'/*"}]}' --bucket ${S3Bucket}
-                gatsby -v | grep CLI -A 0 -B 0 >> /command-output.txt
+            Command:
+                Fn::Sub: |
+                    sudo su
+                    cd /home/ec2-user/
+                    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+                    export NVM_DIR="$HOME/.nvm"
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+                    nvm --version
+                    nvm install node
+                    npm install -g gatsby-cli
+                    yum install git -y
+                    gatsby new gatsby-starter-portfolio-cara https://github.com/LekoArts/gatsby-starter-portfolio-cara
+                    cd /home/ec2-user/gatsby-starter-portfolio-cara/src/@lekoarts/gatsby-theme-cara/sections/
+                    echo '# Congratulations!' > intro.mdx
+                    echo '' >> intro.mdx
+                    echo 'You can now run Bash commands in your CloudFormation Stacks.' >> intro.mdx
+                    cd /home/ec2-user/gatsby-starter-portfolio-cara/node_modules/@lekoarts/gatsby-theme-cara/src/templates/
+                    sed -i 's/5/1/g' cara.tsx
+                    cd /home/ec2-user/gatsby-starter-portfolio-cara/
+                    sed -i 's/Cara - Gatsby Starter Portfolio/CommandRunner/g' gatsby-config.js
+                    gatsby build
+                    cd public
+                    aws s3 sync . s3://${S3Bucket}
+                    #aws s3api put-bucket-website --bucket ${S3Bucket} --website-configuration '{"IndexDocument":{"Suffix":"index.html"}}'
+                    #aws s3api put-bucket-policy --policy '{"Version":"2012-10-17","Statement":[{"Sid":"PublicReadGetObject","Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::'"${S3Bucket}"'/*"}]}' --bucket ${S3Bucket}
+                    gatsby -v | grep CLI -A 0 -B 0 >> /command-output.txt
             Role: EC2AdminRole
             LogGroup: new-log-group-pls-delete
 
     S3Bucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: !Ref BucketName
+            BucketName:
+                Fn::Ref: BucketName
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: FALSE
             WebsiteConfiguration:
                 IndexDocument: index.html
             AccessControl: PublicRead
-                
+
     S3BucketPolicy:
         Type: AWS::S3::BucketPolicy
         Properties:
-            Bucket: !Ref S3Bucket
+            Bucket:
+                Fn::Ref: S3Bucket
             PolicyDocument:
                 Statement:
                   - Sid: PublicReadGetObject
                     Effect: Allow
                     Principal: '*'
                     Action: 's3:GetObject'
-                    Resource: !Sub 'arn:aws:s3:::${S3Bucket}/*'
+                    Resource:
+                        Fn::Sub: 'arn:aws:s3:::${S3Bucket}/*'
 
-                
+
 
 Outputs:
     WebsiteURL:
         Description: The output of the commandrunner.
-        Value: !Sub 'http://${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com'
+        Value:
+            Fn::Sub: 'http://${S3Bucket}.s3-website-${AWS::Region}.amazonaws.com'
     GatsbyVersion:
         Description: The version of Gatsby CLI used to create the static website.
-        Value: !GetAtt CommandRunner.Output
+        Value:
+            Fn::GetAtt: CommandRunner.Output

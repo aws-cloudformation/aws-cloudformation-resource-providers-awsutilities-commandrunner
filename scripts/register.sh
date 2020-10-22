@@ -15,11 +15,11 @@ do
         --set-default)
            set_default=1
            ;;
-#        --bucket-name) 
+#        --bucket-name)
 ##          echo "Bucket name provided is" $2
 #           bucket_name=$2
 #           ;;
-         --*) 
+         --*)
             echo "Not an option $1"
             ;;
 #        *) echo "argument $1"
@@ -61,7 +61,7 @@ execution_role_arn=`aws cloudformation describe-stacks --stack-name awsutility-c
 
 bucket_name=`uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-'`
 
-# Create a bucket always as it will be cleaned up after installation.  
+# Create a bucket always as it will be cleaned up after installation.
 echo Creating temporary S3 Bucket $bucket_name...
 mb_result=`aws s3 mb s3://$bucket_name --region $region 2>&1`
 if [ $? -eq 0 ]; then
@@ -82,7 +82,7 @@ fi
 # Configure S3 Bucket Policy
 
 set -e
-echo "Configuring S3 Bucket Policy for temporary S3 Bucket" $bucket_name... 
+echo "Configuring S3 Bucket Policy for temporary S3 Bucket" $bucket_name...
 aws s3api put-bucket-policy --bucket $bucket_name --policy '{"Version":"2012-10-17","Statement":[{"Action":["s3:GetObject","s3:ListBucket"],"Effect":"Allow","Resource":["arn:aws:s3:::'"$bucket_name"'/*","arn:aws:s3:::'"$bucket_name"'"],"Principal":{"Service":"cloudformation.amazonaws.com"}}]}'
 echo "Configuring S3 Bucket Policy for temporary S3 Bucket" $bucket_name complete.
 

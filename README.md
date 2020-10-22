@@ -26,15 +26,15 @@
 
 AWSUtility::CloudFormation::CommandRunner is a CloudFormation resource type created using the recently released CloudFormation Resource Providers framework.
 
-The AWSUtility::CloudFormation::CommandRunner resource allows users to run Bash commands in any CloudFormation stack. 
+The AWSUtility::CloudFormation::CommandRunner resource allows users to run Bash commands in any CloudFormation stack.
 
 This allows for unlimited customization such as executing AWS CLI/API calls, running scripts in any language, querying databases, doing external REST API calls, cleanup routines, validations, dynamically referencing parameters and just about anything that can be done using the shell on an EC2 instance.
 
-The `AWSUtility::CloudFormation::CommandRunner` resource runs any command provided to it before or after any resource in the Stack. 
+The `AWSUtility::CloudFormation::CommandRunner` resource runs any command provided to it before or after any resource in the Stack.
 
 `AWSUtility::CloudFormation::CommandRunner` can be used to perform inside your CloudFormation stack, any API call, script, custom logic, external check, conditions, cleanup, dynamic parameter retrieval and just about anything that can be done using a command.
 
-Any output written using the command to the reserved file `/command-output.txt` can be referenced anywhere in your template by using `!Fn::GetAtt Command.Output` like below, where `Command` is the logical name of the `AWSUtility::CloudFormation::CommandRunner`resource. 
+Any output written using the command to the reserved file `/command-output.txt` can be referenced anywhere in your template by using `!Fn::GetAtt Command.Output` like below, where `Command` is the logical name of the `AWSUtility::CloudFormation::CommandRunner`resource.
 
 ```yaml
 Resources:
@@ -62,7 +62,7 @@ Only the property `Command` is required, while `Role`, `LogGroup`, `SubnetId` an
 `SubnetId` is the ID of the Subnet that the command will be executed in.
 `SecurityGroupId` is the ID of the Security Group applied during the execution of the command.
 
-For more information about the above properties, navigate to [Properties](#properties) in the [Documentation](#documentation). 
+For more information about the above properties, navigate to [Properties](#properties) in the [Documentation](#documentation).
 
 _Note that the command once executed cannot be undone. It is highly recommended to test the AWSUtility::CloudFormation::CommandRunner resource out in a test stack before adding it to your production stack._
 
@@ -163,7 +163,7 @@ kms:Encrypt
 kms:Decrypt
 ```
 
-- Runs the `aws s3 mb` AWS CLI command to create an S3 bucket with the name specified. 
+- Runs the `aws s3 mb` AWS CLI command to create an S3 bucket with the name specified.
 - Runs the `aws s3api put-bucket-policy` AWS CLI command to put the following bucket policy on the new bucket, where `<BUCKET_NAME>` is the specified bucket name.
 
 ```json
@@ -248,7 +248,7 @@ The following sample policy can be attached to the IAM User/Role if they do not 
             "Properties": {
                 "Command": "String",
                 "Role": "String",
-                "LogGroup": "String",           
+                "LogGroup": "String",
                 "SubnetId": "String",
                 "SecurityGroupId" "String",
                 "KeyId" "String"
@@ -285,29 +285,29 @@ Outputs:
 ### Command
 
    The bash command that you would like to run.
-   
+
    For AWS CLI commands, please specify the region using the --region option.
-   
-   #### Note: 
+
+   #### Note:
    Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example.
-         
+
    `aws s3 ls > /command-output.txt`
-   
-   #### Note: 
+
+   #### Note:
    The command is run on the latest Amazon Linux 2 AMI in your region.
-         
+
    _Required_: Yes
-   
+
    _Type_: String
-   
+
    _Update requires_: Replacement
 
 ### Role
 
    The IAM Instance Profile to be used to run the Command. The Role in the Instance Profile will need all the permissions required to run the above `Command`.
-   
+
    #### Note:
-   The Role should have permissions to perform the actions below to write logs to CloudWatch from the command's execution. 
+   The Role should have permissions to perform the actions below to write logs to CloudWatch from the command's execution.
    ```
    "logs:CreateLogStream",
    "logs:CreateLogGroup",
@@ -315,68 +315,68 @@ Outputs:
    ```
 
    If the Role does not have the above logging permissions, the command will still work but no logs will be written.
-   
+
    #### Note:
-   The Role in the Instance Profile should specify `ec2.amazonaws.com` as a Trusted Entity. 
+   The Role in the Instance Profile should specify `ec2.amazonaws.com` as a Trusted Entity.
    An Instance Profile is created automatically when a Role is created using the Console for an EC2 instance.
-   
+
    _Required_: No
-   
+
    _Type_: String
-   
+
    _Update requires_: Replacement
 
 ### LogGroup
 
-   The CloudWatch Log Group to stream the logs from the specified command. 
-   
-   If one is not provided the default `cloudformation-commandrunner-log-group` one will be used. 
-   
+   The CloudWatch Log Group to stream the logs from the specified command.
+
+   If one is not provided the default `cloudformation-commandrunner-log-group` one will be used.
+
    If the specified log group does not exist, a new one will be created.
-   
+
    #### Tip:
    To log a trace of your commands and their arguments after they are expanded and before they are executed, run `set -xe` in the `Command` property before your actual command.
-   
+
    _Required_: No
-   
+
    _Type_: String
-   
+
    _Update requires_: Replacement
-   
+
 ### SubnetId
 
    The Id of the Subnet to execute the command in.
-   
-   #### Note: 
+
+   #### Note:
    If the `SubnetID` is not specified, it will create the resource in a subnet in the default VPC of the region.
-   
+
    _Required_: No
-   
+
    _Type_: String
-   
+
    _Update requires_: Replacement
-   
+
 ### SecurityGroupId
 
    The Id of the Security Group to attach to the instance the command is run in. If using SecurityGroup, the SubnetId property is required.
-   
-   #### Note: 
+
+   #### Note:
    If the `SecurityGroupId` is not specified, the command will be run with a security group with open Egress rules and no Ingress rules.
-   
+
    _Required_: No
-   
+
    _Type_: String
-   
+
    _Update requires_: Replacement
-   
+
 ### KeyId
 
    Id of the KMS key to use when encrypting the output stored in SSM Parameter Store. If not specified, the account's default KMS key is used.
-      
+
    _Required_: No
-   
+
    _Type_: String
-   
+
    _Update requires_: Replacement
 
 ---
@@ -471,13 +471,13 @@ Outputs:
 # Use Cases
 
 - The AWSUtility::CloudFormation::CommandRunner resource lets you perform any API call, script, custom logic, external check, conditions, cleanup, dynamic parameter retrieval and anything else that can be done using a command.
- 
+
 - Get parameters dynamically during the Stack's execution instead of passing in Parameters during stack creation.
   - Currently, Dynamic Referencing i.e SSM {{resolve}} on CloudFormation cannot automatically get the latest version of the SSM Parameter. Due to this, users have to know the latest version number and manually put it in every time or the CFN stack will continue to resolve to the old version. This can be worked around using AWSUtility::CloudFormation::CommandRunner to always get the latest parameter value.
-  
+
 - Currently, there is no AWS::ECS resource that allows you to configure the Account Settings. However, you can do this using the AWSUtility::CloudFormation::CommandRunner resource by running the `aws ecs put-account-setting` CLI commmand.
 
-- Currently, there is no way to create an image (AMI) using a running EC2 instance, but it can be done using the AWSUtility::CloudFormation::CommandRunner resource by using the `aws ec2 create-image` CLI command. 
+- Currently, there is no way to create an image (AMI) using a running EC2 instance, but it can be done using the AWSUtility::CloudFormation::CommandRunner resource by using the `aws ec2 create-image` CLI command.
 
 ---
 
@@ -485,15 +485,15 @@ Outputs:
 
 #### Q. Why use EC2 instead of Lambda?
 
- - Lambda does not natively support using Bash. 
+ - Lambda does not natively support using Bash.
 
- - Even if Bash is added using custom Lambda Layers it will still not allow installing new packages or running other programming / scripting languages. 
+ - Even if Bash is added using custom Lambda Layers it will still not allow installing new packages or running other programming / scripting languages.
 
  - Lambda is also more expensive than running a small EC2 instance for approximately 2 minutes.
 
 #### Q. Why make this when Custom Resources and Macros are available?
 
- - Developing a Custom Resource or Macro requires writing several lines of code and troubleshooting which is considered to be development effort. 
+ - Developing a Custom Resource or Macro requires writing several lines of code and troubleshooting which is considered to be development effort.
 
  - The AWSUtility::CloudFormation::CommandRunner provides a quick fix to solve problems with a single line of code and does not require any development effort.
 
@@ -515,7 +515,7 @@ The build script will do the following:
 
 3. From the output of the `cfn submit` command, it gets the version of the build and updates the default version to be used in CloudFormation.
 
-Once the script finishes, the AWSUtility::CloudFormation::CommandRunner resource will be ready to use. 
+Once the script finishes, the AWSUtility::CloudFormation::CommandRunner resource will be ready to use.
 
 You can find an example of how to use the resource in the file `usage-template.yaml`.
 
@@ -536,7 +536,7 @@ jq-1.6
 
 ### v1.2
 
-- Output stored in SSM Parameter Store is now `SecureString` by default i.e Encrypted at rest using the Default KMS key of the account. 
+- Output stored in SSM Parameter Store is now `SecureString` by default i.e Encrypted at rest using the Default KMS key of the account.
 - Added new parameter `KMSKeyId` allowing users to specify their own customer-managed KMS Key to encrypt the SSM SecureString Parameter.
 - Updated README with log permissions and specified that no error is thrown when it can’t write to log group. It requires the following permissions to write logs. If not provided, it won’t do any logging.
 ```
@@ -545,7 +545,7 @@ jq-1.6
 "logs:PutLogEvents"
 ```
 - The idea is that the command should still run even if the logs can’t be written. Users should have the option to not log if not required.
-      
+
 ### v1.1
 
 - Added `register.sh`and user build steps
@@ -553,7 +553,7 @@ jq-1.6
 - Contract tests using `cfn test` all work with the following results.
 
 ```bash
-collected 12 items / 5 deselected / 7 selected                                                                                                        
+collected 12 items / 5 deselected / 7 selected
 
 handler_create.py::contract_create_delete PASSED                                                                                                [ 14%]
 handler_create.py::contract_create_duplicate PASSED                                                                                             [ 28%]
@@ -620,7 +620,7 @@ iam:PassRole
 
 #Only required if using the KeyId property, i.e custom KMS Key for the SSM SecureString
 kms:Encrypt
-kms:Decrypt 
+kms:Decrypt
 ```
 
 ---
