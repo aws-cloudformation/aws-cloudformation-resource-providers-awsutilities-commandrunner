@@ -9,8 +9,10 @@ Resources:
   IopsCalculator:
     Type: AWSUtility::CloudFormation::CommandRunner
     Properties:
-      Command: !Sub 'expr ${EBSVolumeSize} \* 20 > /command-output.txt'
+      Command:
+        Fn::Sub: 'expr ${EBSVolumeSize} \* 20 > /command-output.txt'
 Outputs:
   Iops:
     Description: EBS IOPS
-    Value: !GetAtt IopsCalculator.Output
+    Value:
+      Fn::GetAtt: IopsCalculator.Output
