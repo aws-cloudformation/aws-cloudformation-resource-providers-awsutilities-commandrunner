@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  EBSVolumeSize:
+    Type: Number
+    Default: 10
+    MinValue: 10
+    MaxValue: 50
+Resources:
+  IopsCalculator:
+    Type: AWSUtility::CloudFormation::CommandRunner
+    Properties:
+      Command:
+        Fn::Sub: 'expr ${EBSVolumeSize} \* 20 > /command-output.txt'
+Outputs:
+  Iops:
+    Description: EBS IOPS
+    Value:
+      Fn::GetAtt: IopsCalculator.Output
