@@ -23,6 +23,7 @@ do
     shift
 done
 
+
 # Delete Execution Role
 
 stack_name='awsutility-cloudformation-commandrunner-execution-role-stack'
@@ -46,6 +47,7 @@ else
 fi
 
 # Deregister Type
+
 
 type_name='AWSUtility::CloudFormation::CommandRunner'
 

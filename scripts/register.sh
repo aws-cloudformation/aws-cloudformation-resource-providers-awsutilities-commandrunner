@@ -9,7 +9,9 @@ if [ -z "$region" ]; then
   exit
 fi
 
+
 set_default=0
+
 
 while test $# -gt 0
 do
