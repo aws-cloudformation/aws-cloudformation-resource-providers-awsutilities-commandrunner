@@ -23,6 +23,32 @@ do
     shift
 done
 
+
+# Delete Execution Role
+
+stack_name='awsutility-cloudformation-commandrunner-execution-role-stack'
+
+echo "Checking if Execution Role exists..."
+
+describe_result=`aws cloudformation describe-stacks --stack-name $stack_name 2>&1`
+
+if ! [ $? -eq 0 ]; then
+    echo "Execution role does not exist."
+    echo "Deleting Execution Role skipped."
+else
+    echo "Execution role exists."
+    echo "Deleting Execution Role..."
+    result=`aws cloudformation delete-stack --stack-name $stack_name 2>&1`
+    if [ $? -eq 0 ]; then
+        echo "Deleting Execution Role complete."
+    else
+        echo $result
+    fi
+fi
+
+# Deregister Type
+
+
 type_name='AWSUtility::CloudFormation::CommandRunner'
 
 version='00000001'
