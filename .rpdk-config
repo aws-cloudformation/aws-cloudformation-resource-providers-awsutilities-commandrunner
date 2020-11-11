@@ -1,0 +1,16 @@
+{
+    "typeName": "AWSUtility::CloudFormation::CommandRunner",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.awsutility.cloudformation.commandrunner.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.awsutility.cloudformation.commandrunner.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "awsutility",
+            "cloudformation",
+            "commandrunner"
+        ],
+        "protocolVersion": "2.0.0"
+    }
+}
