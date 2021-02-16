@@ -80,7 +80,7 @@
     "read": {
       "permissions": [
         "ssm:GetParameter",
-        "cloudwatch:PutMetricData"
+        "logs:PutMetricData"
       ]
     },
     "delete": {
