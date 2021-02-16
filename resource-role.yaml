@@ -26,7 +26,6 @@ Resources:
                 - "cloudformation:CreateStack"
                 - "cloudformation:DeleteStack"
                 - "cloudformation:DescribeStacks"
-                - "cloudwatch:PutMetricData"
                 - "ec2:AuthorizeSecurityGroupEgress"
                 - "ec2:AuthorizeSecurityGroupIngress"
                 - "ec2:CreateSecurityGroup"
