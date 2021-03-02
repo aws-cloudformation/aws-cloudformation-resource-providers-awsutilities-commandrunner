@@ -38,8 +38,12 @@ echo Creating Execution Role...
 role_stack_id=`aws cloudformation create-stack --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --template-body file://resource-role.yaml --capabilities CAPABILITY_IAM --query StackId --output text 2>> registration_logs.log`
 
 if ! [ $? -eq 0 ]; then
-    echo Execution role already exists.
-    echo Creating Execution Role skipped.
+    #Check if any updates can be made if it already exists
+    role_stack_id=`aws cloudformation update-stack --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --template-body file://resource-role.yaml --capabilities CAPABILITY_IAM`
+    if ! [ $? -eq 0 ]; then
+        echo Execution role already exists, no changes to be made.
+        echo Creating Execution Role skipped.
+    fi
 fi
 
 stack_progress=`aws cloudformation describe-stacks --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --query Stacks[0].StackStatus --output text`
