@@ -289,9 +289,9 @@ Outputs:
    For AWS CLI commands, please specify the region using the --region option.
 
    #### Note:
-   Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example.
+   Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example. The value written to the file must be a single word value without quotation marks like `vpc-0a12ab123abc9876` as they are intended to be used inside the CloudFormation template using `Fn::GetAtt`.
 
-   `aws s3 ls > /command-output.txt`
+   `aws ec2 describe-vpcs --query Vpcs[0].VpcId --output text  > /command-output.txt`
 
    #### Note:
    The command is run on the latest Amazon Linux 2 AMI in your region.
@@ -383,9 +383,9 @@ Outputs:
 
 # Return Values
 
-### Ref
+### Fn::GetAtt
 
-Users can reference the output of the command outputted to /command-output.txt using Fn::GetAtt like in the following syntax.
+Users can reference the output of the command written to `/command-output.txt` using `Fn::GetAtt` like in the following syntax.
 
 ```yaml
 Outputs:
