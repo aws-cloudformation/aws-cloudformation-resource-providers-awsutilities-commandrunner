@@ -89,10 +89,18 @@ iam:createRole
 
 *Note: To build the source yourself, see the `Developer Build Steps` section below.*
 
-**Step 1**: Use the `register.sh` bash script to register resource from scratch and upload package to S3 bucket.
+**Step 0**: Clone this repository and download the latest release using the following commands.
 
 ```text
-$ ./scripts/register.sh
+git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
+cd aws-cloudformation-resource-providers-awsutilities-commandrunner
+curl -LO https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner/releases/latest/download/awsutility-cloudformation-commandrunner.zip
+```
+
+**Step 1**: Use the `register.sh` bash script to register resource from scratch and upload package to S3 bucket. Pass the optional `--set-default` option to set this version to be the default version for the `AWSUtility::CloudFormation::CommandRunner` resource.
+
+```text
+$ ./scripts/register.sh --set-default
 ```
 
 Below is an example of a successful registration using the `register.sh` script.
@@ -533,6 +541,12 @@ jq-1.6
 ---
 
 # Change Log
+
+### v1.21
+
+- Updated README to add more clarification into what values are accepted by `/command-output.txt`.
+- Changed `cloudwatch:` to `logs:`, fixing the permissions issue when writing logs.
+- Updated README to improve instructions for user installation steps.
 
 ### v1.2
 
