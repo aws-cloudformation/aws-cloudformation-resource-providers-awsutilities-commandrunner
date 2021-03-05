@@ -177,7 +177,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard().build();
                     DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
                     describeVpcsRequest.withFilters(new Filter("isDefault").withValues("true"));
-                    DescribeVpcsResult describeVpcsResult = proxy.injectCredentialsAndInvoke(describeVpcsRequest, ec2::describeVpcs);
+                    DescribeVpcsResult describeVpcsResult = proxy.<DescribeVpcsRequest,DescribeVpcsResult>injectCredentialsAndInvoke(describeVpcsRequest, ec2::describeVpcs);
                     String vpcId = describeVpcsResult.getVpcs().get(0).getVpcId();
                     if (vpcId == null || vpcId.isEmpty()) {
                         System.out.println("No default VPC found in this region, please specify a subnet using the NetworkConfiguration property.");
@@ -190,7 +190,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     VpcId.setParameterValue(vpcId);
                     DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
                     describeSubnetsRequest.withFilters(new Filter("vpc-id").withValues(vpcId));
-                    DescribeSubnetsResult describeSubnetsResult = proxy.injectCredentialsAndInvoke(describeSubnetsRequest, ec2::describeSubnets);
+                    DescribeSubnetsResult describeSubnetsResult = proxy.<DescribeSubnetsRequest,DescribeSubnetsResult>injectCredentialsAndInvoke(describeSubnetsRequest, ec2::describeSubnets);
                     String subnetId = describeSubnetsResult.getSubnets().get(describeSubnetsResult.getSubnets().size()-1).getSubnetId();
                     if (subnetId == null || subnetId.isEmpty()) {
                         System.out.println("Default VPC has no subnets. Please specify a subnet using the NetworkConfiguration property");
@@ -235,7 +235,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard().build();
                     DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
                     describeSubnetsRequest.withFilters(new Filter("subnet-id").withValues(model.getSubnetId()));
-                    DescribeSubnetsResult describeSubnetsResult = proxy.injectCredentialsAndInvoke(describeSubnetsRequest, ec2::describeSubnets);
+                    DescribeSubnetsResult describeSubnetsResult = proxy.<DescribeSubnetsRequest,DescribeSubnetsResult>injectCredentialsAndInvoke(describeSubnetsRequest, ec2::describeSubnets);
                     String vpcId = describeSubnetsResult.getSubnets().get(0).getVpcId();
                     VpcId.setParameterValue(vpcId);
                     parameters.add(VpcId);
@@ -305,7 +305,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             wait.setStackName(stackName);
             String  stackStatus = "Unknown";
             String  stackReason = "";
-            List<Stack> stacks = proxy.injectCredentialsAndInvoke(wait, stackbuilder::describeStacks).getStacks();
+            List<Stack> stacks = proxy.<DescribeStacksRequest,DescribeStacksResult>injectCredentialsAndInvoke(wait, stackbuilder::describeStacks).getStacks();
             if (
                     stacks.get(0).getStackStatus().equals(StackStatus.CREATE_COMPLETE.toString()) ||
                     stacks.get(0).getStackStatus().equals(StackStatus.CREATE_FAILED.toString()) ||

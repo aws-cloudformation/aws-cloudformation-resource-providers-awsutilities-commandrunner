@@ -1,4 +1,5 @@
 {
+    "artifact_type": "RESOURCE",
     "typeName": "AWSUtility::CloudFormation::CommandRunner",
     "language": "java",
     "runtime": "java8",
@@ -12,5 +13,6 @@
             "commandrunner"
         ],
         "protocolVersion": "2.0.0"
-    }
+    },
+    "executableEntrypoint": "software.awsutility.cloudformation.commandrunner.HandlerWrapperExecutable"
 }
