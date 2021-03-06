@@ -53,7 +53,7 @@ Outputs:
         Description: The output of the CommandRunner.
         Value: !GetAtt Command.Output
 ```
-In the above example, `sed -n 1p` prints only the first line from the response returned by `aws s3 ls`. To get the bucket name, `sed -n 1p` pipes the response to `cut -d " " -f3`, which chooses the third element in the array created after splitting the line delimited by a space.
+*Note: In the above example, `sed -n 1p` prints only the first line from the response returned by `aws s3 ls`. To get the bucket name, `sed -n 1p` pipes the response to `cut -d " " -f3`, which chooses the third element in the array created after splitting the line delimited by a space.*
 
 Only the property `Command` is required, while `Role`, `LogGroup`, `SubnetId` and `SecurityGroupId` are not required and have defaults.
 
@@ -298,7 +298,7 @@ Outputs:
    For AWS CLI commands, please specify the region using the --region option.
 
    #### Note:
-   Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example. The value written to the file must be a single word value without quotation marks like `vpc-0a12ab123abc9876` as they are intended to be used inside the CloudFormation template using `Fn::GetAtt`.
+   Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example. The value written to the file must be a non-empty single word value without quotation marks like `vpc-0a12ab123abc9876` as they are intended to be used inside the CloudFormation template using `Fn::GetAtt`.
 
    `aws ec2 describe-vpcs --query Vpcs[0].VpcId --output text  > /command-output.txt`
 
