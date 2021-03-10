@@ -41,7 +41,7 @@ Resources:
   Command:
     Type: 'AWSUtility::CloudFormation::CommandRunner'
     Properties:
-      Command: aws s3 ls > /command-output.txt
+      Command: aws s3 ls | sed -n 1p | cut -d " " -f3 > /command-output.txt
       Role: String
       LogGroup: String #Optional
       SubnetId: String #Optional
@@ -53,6 +53,7 @@ Outputs:
         Description: The output of the CommandRunner.
         Value: !GetAtt Command.Output
 ```
+*Note: In the above example, `sed -n 1p` prints only the first line from the response returned by `aws s3 ls`. To get the bucket name, `sed -n 1p` pipes the response to `cut -d " " -f3`, which chooses the third element in the array created after splitting the line delimited by a space.*
 
 Only the property `Command` is required, while `Role`, `LogGroup`, `SubnetId` and `SecurityGroupId` are not required and have defaults.
 
@@ -89,10 +90,18 @@ iam:createRole
 
 *Note: To build the source yourself, see the `Developer Build Steps` section below.*
 
-**Step 1**: Use the `register.sh` bash script to register resource from scratch and upload package to S3 bucket.
+**Step 0**: Clone this repository and download the latest release using the following commands.
 
 ```text
-$ ./scripts/register.sh
+git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
+cd aws-cloudformation-resource-providers-awsutilities-commandrunner
+curl -LO https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner/releases/latest/download/awsutility-cloudformation-commandrunner.zip
+```
+
+**Step 1**: Use the `register.sh` bash script to register resource from scratch and upload package to S3 bucket. Pass the optional `--set-default` option to set this version to be the default version for the `AWSUtility::CloudFormation::CommandRunner` resource.
+
+```text
+$ ./scripts/register.sh --set-default
 ```
 
 Below is an example of a successful registration using the `register.sh` script.
@@ -289,7 +298,7 @@ Outputs:
    For AWS CLI commands, please specify the region using the --region option.
 
    #### Note:
-   Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example. The value written to the file must be a single word value without quotation marks like `vpc-0a12ab123abc9876` as they are intended to be used inside the CloudFormation template using `Fn::GetAtt`.
+   Every command needs to output the desired value into the reserved file "/command-output.txt" like the following example. The value written to the file must be a non-empty single word value without quotation marks like `vpc-0a12ab123abc9876` as they are intended to be used inside the CloudFormation template using `Fn::GetAtt`.
 
    `aws ec2 describe-vpcs --query Vpcs[0].VpcId --output text  > /command-output.txt`
 
@@ -533,6 +542,12 @@ jq-1.6
 ---
 
 # Change Log
+
+### v1.21
+
+- Updated README to add more clarification into what values are accepted by `/command-output.txt`.
+- Changed `cloudwatch:` to `logs:`, fixing the permissions issue when writing logs.
+- Updated README to improve instructions for user installation steps.
 
 ### v1.2
 
