@@ -46,6 +46,8 @@ Resources:
             WebsiteConfiguration:
                 IndexDocument: index.html
             AccessControl: PublicRead
+            VersioningConfiguration:
+                Status: Enabled
 
     S3BucketPolicy:
         Type: AWS::S3::BucketPolicy
