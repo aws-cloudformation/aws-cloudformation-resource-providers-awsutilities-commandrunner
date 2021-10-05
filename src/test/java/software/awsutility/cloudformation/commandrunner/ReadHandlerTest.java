@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.awsutility.cloudformation.commandrunner;
 
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
+import com.amazonaws.AmazonWebServiceResult;
+import com.amazonaws.ResponseMetadata;
 import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
 import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
 import com.amazonaws.services.simplesystemsmanagement.model.Parameter;
@@ -18,7 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.awsutility.cloudformation.commandrunner.CallbackContext;
+
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +47,7 @@ public class ReadHandlerTest {
     @BeforeEach
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class, Mockito.RETURNS_DEEP_STUBS);
-        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), any())).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue(EXPECTED_OUTPUT)));
+        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), (Function<GetParameterRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue(EXPECTED_OUTPUT)));
         logger = mock(Logger.class, Mockito.RETURNS_DEEP_STUBS);
     }
 

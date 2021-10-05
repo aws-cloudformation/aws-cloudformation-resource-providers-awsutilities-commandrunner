@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.awsutility.cloudformation.commandrunner;
 
+import com.amazonaws.AmazonWebServiceResult;
+import com.amazonaws.ResponseMetadata;
 import com.amazonaws.services.simplesystemsmanagement.model.*;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -13,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.awsutility.cloudformation.commandrunner.CallbackContext;
-import software.awsutility.cloudformation.commandrunner.DeleteHandler;
+
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +35,7 @@ public class DeleteHandlerTest {
     @BeforeEach
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
-        when(proxy.injectCredentialsAndInvoke(any(DeleteParameterRequest.class), any())).thenReturn(new DeleteParameterResult());
+        when(proxy.injectCredentialsAndInvoke(any(DeleteParameterRequest.class), (Function<DeleteParameterRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new DeleteParameterResult());
         logger = mock(Logger.class);
     }
 

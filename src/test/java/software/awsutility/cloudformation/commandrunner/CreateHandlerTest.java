@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.awsutility.cloudformation.commandrunner;
 
+import com.amazonaws.AmazonWebServiceResult;
+import com.amazonaws.ResponseMetadata;
 import com.amazonaws.services.cloudformation.model.*;
 import com.amazonaws.services.ec2.model.*;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
@@ -21,9 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.awsutility.cloudformation.commandrunner.CallbackContext;
-import software.awsutility.cloudformation.commandrunner.CreateHandler;
-
+import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -48,15 +48,15 @@ public class CreateHandlerTest {
     @BeforeEach
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
-        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), any())).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue("ami-1234")));
-        when(proxy.injectCredentialsAndInvoke(any(DescribeVpcsRequest.class), any())).thenReturn(new DescribeVpcsResult().withVpcs(new Vpc().withVpcId("vpc-1234").withIsDefault(Boolean.TRUE)));
-        when(proxy.injectCredentialsAndInvoke(any(DescribeSubnetsRequest.class), any())).thenReturn(new DescribeSubnetsResult().withSubnets(new Subnet().withSubnetId("subnet-1234")));
-        when(proxy.injectCredentialsAndInvoke(any(CreateStackRequest.class), any())).thenReturn(new CreateStackResult());
-        when(proxy.injectCredentialsAndInvoke(any(DescribeStacksRequest.class), any())).thenReturn(new DescribeStacksResult().withStacks(new Stack().withStackStatus(StackStatus.CREATE_COMPLETE).withStackStatusReason("Successful").withOutputs(new Output().withOutputValue("expected-value"))));
-        when(proxy.injectCredentialsAndInvoke(any(DeleteStackRequest.class), any())).thenReturn(new DeleteStackResult());
-        when(proxy.injectCredentialsAndInvoke(any(PutParameterRequest.class), any())).thenReturn(new PutParameterResult());
-        when(proxy.injectCredentialsAndInvoke(any(GetCallerIdentityRequest.class), any())).thenReturn(new GetCallerIdentityResult().withArn("arn:aws:sts::123456789012:assumed-role/my-role-name/my-role-session-name"));
-        when(proxy.injectCredentialsAndInvoke(any(SimulatePrincipalPolicyRequest.class), any())).thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult().withEvalDecision("Allowed")));
+        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), (Function<GetParameterRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue("ami-1234")));
+        when(proxy.injectCredentialsAndInvoke(any(DescribeVpcsRequest.class), (Function<DescribeVpcsRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new DescribeVpcsResult().withVpcs(new Vpc().withVpcId("vpc-1234").withIsDefault(Boolean.TRUE)));
+        when(proxy.injectCredentialsAndInvoke(any(DescribeSubnetsRequest.class), (Function<DescribeSubnetsRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new DescribeSubnetsResult().withSubnets(new Subnet().withSubnetId("subnet-1234")));
+        when(proxy.injectCredentialsAndInvoke(any(CreateStackRequest.class), (Function<CreateStackRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new CreateStackResult());
+        when(proxy.injectCredentialsAndInvoke(any(DescribeStacksRequest.class), (Function<DescribeStacksRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new DescribeStacksResult().withStacks(new Stack().withStackStatus(StackStatus.CREATE_COMPLETE).withStackStatusReason("Successful").withOutputs(new Output().withOutputValue("expected-value"))));
+        when(proxy.injectCredentialsAndInvoke(any(DeleteStackRequest.class), (Function<DeleteStackRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new DeleteStackResult());
+        when(proxy.injectCredentialsAndInvoke(any(PutParameterRequest.class), (Function<PutParameterRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new PutParameterResult());
+        when(proxy.injectCredentialsAndInvoke(any(GetCallerIdentityRequest.class), (Function<GetCallerIdentityRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new GetCallerIdentityResult().withArn("arn:aws:sts::123456789012:assumed-role/my-role-name/my-role-session-name"));
+        when(proxy.injectCredentialsAndInvoke(any(SimulatePrincipalPolicyRequest.class), (Function<SimulatePrincipalPolicyRequest, AmazonWebServiceResult<ResponseMetadata>>) any())).thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult().withEvalDecision("Allowed")));
 
         logger = mock(Logger.class);
     }
