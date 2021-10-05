@@ -7,18 +7,9 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.amazonaws.services.cloudformation.model.*;
-import com.amazonaws.services.ec2.*;
 import com.amazonaws.services.ec2.model.*;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
@@ -26,15 +17,12 @@ import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
 import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
 import com.amazonaws.services.simplesystemsmanagement.model.PutParameterRequest;
 import com.amazonaws.services.simplesystemsmanagement.model.PutParameterResult;
-import org.apache.commons.lang3.StringUtils;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
-import com.amazonaws.services.s3.AmazonS3;
-import software.awsutility.cloudformation.commandrunner.CallbackContext;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,22 +66,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
             try {
 
-                //Check if TerminateInstances is allowed
-                AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard().build();
-                GetCallerIdentityRequest getCallerIdentityRequest = new GetCallerIdentityRequest();
-                GetCallerIdentityResult getCallerIdentityResult = proxy.injectCredentialsAndInvoke(getCallerIdentityRequest, stsClient::getCallerIdentity);
-                String roleArn = getCallerIdentityResult.getArn();
-                if (roleArn.contains("sts")) {
-                    roleArn = roleArn.replace("sts", "iam");
-                }
-                if (roleArn.contains("assumed-role")) {
-                    roleArn = roleArn.replace("assumed-role", "role");
-                }
-                if (StringUtils.countMatches(roleArn,"/") == 2) {
-                    for (int i = roleArn.lastIndexOf("/"); i < roleArn.length(); i++)
-                    roleArn = roleArn.replace(roleArn.substring(roleArn.lastIndexOf("/"), roleArn.length()), "");
-                }
-
                 InputStream in = CreateHandler.class.getResourceAsStream("/BaseTemplate.json");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 StringBuilder out = new StringBuilder();
@@ -112,7 +84,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 AMIId.setParameterKey("AMIId");
 
                 //Dynamically get latest Amazon Linux 2 AMI for the region
-                  AWSSimpleSystemsManagement simpleSystemsManagementClient = ((AWSSimpleSystemsManagementClientBuilder.standard())).build();
+                AWSSimpleSystemsManagement simpleSystemsManagementClient = ((AWSSimpleSystemsManagementClientBuilder.standard())).build();
 
                 GetParameterRequest parameterRequest = new GetParameterRequest();
                 parameterRequest.withName("/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2").setWithDecryption(Boolean.valueOf(true));
