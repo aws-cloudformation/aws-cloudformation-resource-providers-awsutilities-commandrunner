@@ -77,39 +77,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             String stackName           = "AWSUtility-CloudFormation-CommandRunner-"+generatedString;
 
             try {
-
-                //Check if TerminateInstances is allowed
-                AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard().build();
-                GetCallerIdentityRequest getCallerIdentityRequest = new GetCallerIdentityRequest();
-                GetCallerIdentityResult getCallerIdentityResult = proxy.injectCredentialsAndInvoke(getCallerIdentityRequest, stsClient::getCallerIdentity);
-                String roleArn = getCallerIdentityResult.getArn();
-                if (roleArn.contains("sts")) {
-                    roleArn = roleArn.replace("sts", "iam");
-                }
-                if (roleArn.contains("assumed-role")) {
-                    roleArn = roleArn.replace("assumed-role", "role");
-                }
-                if (StringUtils.countMatches(roleArn,"/") == 2) {
-                    for (int i = roleArn.lastIndexOf("/"); i < roleArn.length(); i++)
-                    roleArn = roleArn.replace(roleArn.substring(roleArn.lastIndexOf("/"), roleArn.length()), "");
-                }
-
-                AmazonIdentityManagement iamClient = AmazonIdentityManagementClientBuilder.standard().build();
-                SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest = new SimulatePrincipalPolicyRequest();
-                Collection<String> actions = new LinkedList<>();
-                actions.add("ec2:TerminateInstances");
-                simulatePrincipalPolicyRequest.setActionNames(actions);
-                simulatePrincipalPolicyRequest.setPolicySourceArn(roleArn);
-
-                SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = proxy.injectCredentialsAndInvoke(simulatePrincipalPolicyRequest, iamClient::simulatePrincipalPolicy);
-                if ( simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().contains("Deny") || simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().equals("ExplicitDeny") || simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().equals("ImplicitDeny") ) {
-                    return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                            .status(OperationStatus.FAILED)
-                            .errorCode(HandlerErrorCode.InvalidRequest)
-                            .message("You do not have permissions to make the TerminateInstances API call. Please try again with the necessary permissions.")
-                            .build();
-                }
-
                 InputStream in = CreateHandler.class.getResourceAsStream("/BaseTemplate.json");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 StringBuilder out = new StringBuilder();
