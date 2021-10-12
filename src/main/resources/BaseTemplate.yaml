@@ -1,0 +1,156 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  This is a base template for the AWSUtility::CloudFormation::CommandRunner custom resource definition
+
+Parameters:
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+  AMIId:
+    Type: String
+    Default: ami-0d1b5cb9d3807dc13
+  InstanceType:
+    Type: String
+    Default: t2.medium
+  IamInstanceProfile:
+    Type: String
+    Default: empty
+  SecurityGroupId:
+    Type: String
+    Default: empty
+  VpcId:
+    Type: String
+    Default: empty
+  Command:
+    Type: String
+    Default: |
+      aws --version 2>&1 \
+        | tail -1 \
+        | head -n 1 \
+        > /command-output.txt
+  LogGroup:
+    Type: String
+    Default: "cloudformation-commandrunner-log-group"
+
+Conditions:
+  CreateSecurityGroup: !Equals [!Ref SecurityGroupId, "empty"]
+  UseInstanceProfile: !Not [!Equals [!Ref IamInstanceProfile, "empty"]]
+
+Resources:
+  SecurityGroup:
+    Condition: CreateSecurityGroup
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub "aws-cloudformation-commandrunner-temp-sg-${AWS::StackName}}"
+      GroupDescription: "A temporary security group for AWSUtility::CloudFormation::CommandRunner"
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: -1
+          IpProtocol: -1
+          ToPort: -1
+      VpcId: !Ref VpcId
+
+  EC2Instance:
+    Type: "AWS::EC2::Instance"
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          setup:
+            - setup_awslogs
+        setup_awslogs:
+          packages:
+            yum:
+              awslogs: []
+              jq: []
+          files:
+            "/etc/awslogs/awslogs.conf":
+              mode: '000444'
+              owner: root
+              group: root
+              content: !Sub |
+                [general]
+                state_file = /var/awslogs/state/agent-state
+
+                [/var/log/cloud-init.log]
+                file = /var/log/cloud-init.log
+                log_group_name = ${LogGroup}
+                log_stream_name = {instance_id}/cloud-init.log
+
+                [/var/log/cloud-init-output.log]
+                file = /var/log/cloud-init-output.log
+                log_group_name = ${LogGroup}
+                log_stream_name = {instance_id}/cloud-init-output.log
+
+                [/var/log/cfn-init.log]
+                file = /var/log/cfn-init.log
+                log_group_name = ${LogGroup}
+                log_stream_name = {instance_id}/cfn-init.log
+
+                [/var/log/cfn-hup.log]
+                file = /var/log/cfn-hup.log
+                log_group_name = ${LogGroup}
+                log_stream_name = {instance_id}/cfn-hup.log
+
+                [/var/log/cfn-wire.log]
+                file = /var/log/cfn-wire.log
+                log_group_name = ${LogGroup}
+                log_stream_name = {instance_id}/cfn-wire.log
+            "/etc/awslogs/awscli.conf":
+              mode: '000444'
+              owner: root
+              group: root
+              content: !Sub |
+                [plugins]
+                cwlogs = cwlogs
+
+                [default]
+                region = ${AWS::Region}
+          commands:
+            01_create_state_directory:
+              command: "mkdir -p /var/awslogs/state"
+          services:
+            sysvinit:
+              awslogsd:
+                enabled: true
+                ensureRunning: true
+                files:
+                 - /etc/awslogs/awslogs.conf
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -x
+          yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init \
+            -v \
+            --stack ${AWS::StackName} \
+            --resource EC2Instance \
+            --configsets setup \
+            --region ${AWS::Region}
+
+          ${Command}
+
+          /opt/aws/bin/cfn-signal \
+            -r 'Command ran successfully.' \
+            -e 0 \
+            --id 'Command Output' \
+            --data "$(cat /command-output.txt)" \
+            '${WaitConditionHandle}'
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds:
+        - !If ["CreateSecurityGroup", !Ref SecurityGroup, !Ref SecurityGroupId]
+      ImageId: !Ref AMIId
+      SubnetId: !Ref SubnetId
+      IamInstanceProfile: !If ["UseInstanceProfile", !Ref IamInstanceProfile, !Ref 'AWS::NoValue']
+  WaitConditionHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+  WaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Count: 1
+      Handle: !Ref WaitConditionHandle
+      Timeout: 600
+
+Outputs:
+  Result:
+    Description: "The output of the commandrunner"
+    Value: !Select ["3", !Split ["\"", !GetAtt WaitCondition.Data]]

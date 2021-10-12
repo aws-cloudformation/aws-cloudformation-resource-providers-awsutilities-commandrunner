@@ -286,7 +286,7 @@
             <resource>
                 <directory>src/main/resources/</directory>
                 <includes>
-                    <include>BaseTemplate.json</include>
+                    <include>BaseTemplate.yaml</include>
                 </includes>
             </resource>
         </resources>

@@ -64,12 +64,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             String stackName           = "AWSUtility-CloudFormation-CommandRunner-"+generatedString;
 
             try {
-                InputStream in = CreateHandler.class.getResourceAsStream("/BaseTemplate.json");
+                InputStream in = CreateHandler.class.getResourceAsStream("/BaseTemplate.yaml");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                 StringBuilder out = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     out.append(line);
+                    out.append("\n");
                 }
 
                 CreateStackRequest createRequest = new CreateStackRequest();
