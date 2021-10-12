@@ -110,7 +110,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 InstanceType.setParameterValue(INSTANCE_TYPE);
                 parameters.add(InstanceType);
 
-                if (model.getLogGroup() != null || model.getLogGroup() == "") {
+                if (model.getLogGroup() != null) {
                     Parameter LogGroup = new Parameter();
                     LogGroup.setParameterKey("LogGroup");
                     LogGroup.setParameterValue(model.getLogGroup());
@@ -119,8 +119,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
                 //Dynamically gets both vpcId and subnetId
                 System.out.println(model.toString());
-                if ((model.getSubnetId() == null && model.getSecurityGroupId() == null) ||
-                        (model.getSubnetId() == "" && model.getSecurityGroupId() == "")) { //Check if user provided the subnetId, if not get a default.
+                if ((model.getSubnetId() == null && model.getSecurityGroupId() == null)) { //Check if user provided the subnetId, if not get a default.
                     System.out.println("Inside dynamic creation workflow!");
                     Parameter SubnetId = new Parameter();
                     SubnetId.setParameterKey("SubnetId");
@@ -160,8 +159,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     parameters.add(VpcId);
                 }
                 //Both are provided
-                else if ((model.getSubnetId() != null && model.getSecurityGroupId() != null) ||
-                        (model.getSubnetId() != "" && model.getSecurityGroupId() != "")) {
+                else if ((model.getSubnetId() != null && model.getSecurityGroupId() != null)) {
                     System.out.println("INSIDE BOTH ARE PROVIDED WORKFLOW.");
                     Parameter SubnetId = new Parameter();
                     SubnetId.setParameterKey("SubnetId");
@@ -175,8 +173,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     parameters.add(SecurityGroupId);
                 }
                 //Subnet is provided, but not SecurityGroup. Infer VPC from Subnet and provide VPCId to CFN Stack
-                else if ((model.getSubnetId() != null && model.getSecurityGroupId() == null) ||
-                        (model.getSubnetId() != "" && model.getSecurityGroupId() == "")) {
+                else if ((model.getSubnetId() != null && model.getSecurityGroupId() == null)) {
                     System.out.println("INSIDE SUBNET PROVIDED NO SECURITY GROUP WORKFLOW.");
                     Parameter SubnetId = new Parameter();
                     SubnetId.setParameterKey("SubnetId");
@@ -196,8 +193,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
                 }
 
-                else if ((model.getSubnetId() == null && model.getSecurityGroupId() != null) ||
-                        (model.getSubnetId() == "") && model.getSecurityGroupId() != "") {
+                else if ((model.getSubnetId() == null && model.getSecurityGroupId() != null)) {
                     System.out.println("No SubnetId provided, when using SecurityGroupId, property SubnetId is required.");
                     return ProgressEvent.<ResourceModel, CallbackContext>builder()
                             .status(OperationStatus.FAILED)
