@@ -67,7 +67,8 @@ execution_role_arn=`aws cloudformation describe-stacks --stack-name awsutility-c
 
 # Create Temporary S3 Bucket
 
-bucket_name=`uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-'`
+#bucket_name=`uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-'`
+bucket_name=`artifactcodebld`
 
 # Create a bucket always as it will be cleaned up after installation.
 echo Creating temporary S3 Bucket $bucket_name...
