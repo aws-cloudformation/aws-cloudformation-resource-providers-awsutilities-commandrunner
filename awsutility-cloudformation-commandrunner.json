@@ -33,6 +33,18 @@
     "SecurityGroupId": {
       "type": "string",
       "description": "Id of the Security Group to attach to the instance the command is run in. If using SecurityGroup, SubnetId is required."
+    },
+    "DisableTerminateInstancesCheck": {
+        "type": "string",
+        "description": "By default, CommandRunner checks to see if the execution role can perform a TerminateInstances API call. Set this property to true if you want to skip the check. Note that this means that the CommandRunner instance may not be terminated and will have to be terminated manually."
+    },
+    "Timeout": {
+        "type": "string",
+        "description": "By default, the timeout is 600 seconds. To increase the timeout specify a higher Timeout value in seconds. Maximum timeout value is 43200 seconds i.e 12 hours."
+    },
+    "InstanceType": {
+        "type": "string",
+        "description": "By default, the instance type used is t2.medium. However you can use this property to specify any supported instance type."
     }
   },
   "additionalProperties": false,
@@ -74,7 +86,8 @@
         "kms:Encrypt",
         "kms:Decrypt",
         "sts:GetCallerIdentity",
-        "iam:SimulatePrincipalPolicy"
+        "iam:SimulatePrincipalPolicy",
+        "iam:GetInstanceProfile"
       ]
     },
     "read": {

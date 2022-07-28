@@ -15,6 +15,8 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
+import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
+import com.amazonaws.services.identitymanagement.model.GetInstanceProfileResult;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
@@ -48,7 +50,6 @@ import java.io.BufferedReader;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
 
-    private static final String INSTANCE_TYPE = "t3.micro";
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -79,36 +80,41 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             try {
 
                 //Check if TerminateInstances is allowed
-                AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard().build();
-                GetCallerIdentityRequest getCallerIdentityRequest = new GetCallerIdentityRequest();
-                GetCallerIdentityResult getCallerIdentityResult = proxy.injectCredentialsAndInvoke(getCallerIdentityRequest, stsClient::getCallerIdentity);
-                String roleArn = getCallerIdentityResult.getArn();
-                if (roleArn.contains("sts")) {
-                    roleArn = roleArn.replace("sts", "iam");
-                }
-                if (roleArn.contains("assumed-role")) {
-                    roleArn = roleArn.replace("assumed-role", "role");
-                }
-                if (StringUtils.countMatches(roleArn,"/") == 2) {
-                    for (int i = roleArn.lastIndexOf("/"); i < roleArn.length(); i++)
-                    roleArn = roleArn.replace(roleArn.substring(roleArn.lastIndexOf("/"), roleArn.length()), "");
-                }
+                if (model.getDisableTerminateInstancesCheck() != null && model.getDisableTerminateInstancesCheck().toLowerCase() != "true") {
+                    System.out.println("Performing TerminateInstances Check");
+                    AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard().build();
+                    GetCallerIdentityRequest getCallerIdentityRequest = new GetCallerIdentityRequest();
+                    GetCallerIdentityResult getCallerIdentityResult = proxy.injectCredentialsAndInvoke(getCallerIdentityRequest, stsClient::getCallerIdentity);
+                    String roleArn = getCallerIdentityResult.getArn();
+                    if (roleArn.contains("sts")) {
+                        roleArn = roleArn.replace("sts", "iam");
+                    }
+                    if (roleArn.contains("assumed-role")) {
+                        roleArn = roleArn.replace("assumed-role", "role");
+                    }
+                    if (StringUtils.countMatches(roleArn,"/") == 2) {
+                        for (int i = roleArn.lastIndexOf("/"); i < roleArn.length(); i++)
+                        roleArn = roleArn.replace(roleArn.substring(roleArn.lastIndexOf("/"), roleArn.length()), "");
+                    }
 
-                AmazonIdentityManagement iamClient = AmazonIdentityManagementClientBuilder.standard().build();
-                SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest = new SimulatePrincipalPolicyRequest();
-                Collection<String> actions = new LinkedList<>();
-                actions.add("ec2:TerminateInstances");
-                simulatePrincipalPolicyRequest.setActionNames(actions);
-                simulatePrincipalPolicyRequest.setPolicySourceArn(roleArn);
+                    AmazonIdentityManagement iamClient = AmazonIdentityManagementClientBuilder.standard().build();
+                    SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest = new SimulatePrincipalPolicyRequest();
+                    Collection<String> actions = new LinkedList<>();
+                    actions.add("ec2:TerminateInstances");
+                    simulatePrincipalPolicyRequest.setActionNames(actions);
+                    simulatePrincipalPolicyRequest.setPolicySourceArn(roleArn);
 
-                SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = proxy.injectCredentialsAndInvoke(simulatePrincipalPolicyRequest, iamClient::simulatePrincipalPolicy);
-                if ( simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().contains("Deny") || simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().equals("ExplicitDeny") || simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().equals("ImplicitDeny") ) {
-                    return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                            .status(OperationStatus.FAILED)
-                            .errorCode(HandlerErrorCode.InvalidRequest)
-                            .message("You do not have permissions to make the TerminateInstances API call. Please try again with the necessary permissions.")
-                            .build();
+                    SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = proxy.injectCredentialsAndInvoke(simulatePrincipalPolicyRequest, iamClient::simulatePrincipalPolicy);
+                    if ( simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().contains("Deny") || simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().equals("ExplicitDeny") || simulatePrincipalPolicyResult.getEvaluationResults().get(0).getEvalDecision().equals("ImplicitDeny") ) {
+                        return ProgressEvent.<ResourceModel, CallbackContext>builder()
+                                .status(OperationStatus.FAILED)
+                                .errorCode(HandlerErrorCode.InvalidRequest)
+                                .message("You do not have permissions to make the TerminateInstances API call. Please try again with the necessary permissions.")
+                                .build();
+                    }
                 }
+                
+                
 
                 InputStream in = CreateHandler.class.getResourceAsStream("/BaseTemplate.json");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -124,6 +130,23 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 reader.close();
                 System.out.println("Creating a stack called " + createRequest.getStackName() + ".");
                 Collection<Parameter> parameters = new LinkedList<>();
+                
+                //Timeout Parameter
+                Parameter Timeout = new Parameter();
+                Timeout.setParameterKey("Timeout");
+                if(model.getTimeout() != null) {
+                    Timeout.setParameterValue(model.getTimeout());
+                    parameters.add(Timeout);
+                }
+                
+                //InstanceType Parameter
+                Parameter InstanceType = new Parameter();
+                InstanceType.setParameterKey("InstanceType");
+                if(model.getInstanceType() != null) {
+                    InstanceType.setParameterValue(model.getInstanceType());
+                    parameters.add(InstanceType);
+                }
+                
                 Parameter AMIId = new Parameter();
                 AMIId.setParameterKey("AMIId");
 
@@ -143,20 +166,36 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 Command.setParameterValue(model.getCommand());
                 parameters.add(Command);
 
-                if (model.getRole() != null || model.getRole() == "") {
+                if (model.getRole() != null) {
+                    
+                    //Check if Instance Profile exists
+                    try {
+                        AmazonIdentityManagement iamClient2 = AmazonIdentityManagementClientBuilder.standard().build();
+                        GetInstanceProfileRequest instanceProfileRequest = new GetInstanceProfileRequest();
+                        instanceProfileRequest.withInstanceProfileName(model.getRole());
+                        GetInstanceProfileResult instanceProfileResult = proxy.injectCredentialsAndInvoke(instanceProfileRequest, iamClient2::getInstanceProfile);
+                    } catch (Exception e) {
+                        System.out.println("The Role property specified is not a valid Instance Profile.");
+                        return ProgressEvent.<ResourceModel, CallbackContext>builder()
+                                .status(OperationStatus.FAILED)
+                                .errorCode(HandlerErrorCode.InvalidRequest)
+                                .message("The Role property specified is not a valid Instance Profile.")
+                                .build();
+                    }
+                    
                     Parameter IamInstanceProfile = new Parameter();
                     IamInstanceProfile.setParameterKey("IamInstanceProfile");
                     IamInstanceProfile.setParameterValue(model.getRole());
                     parameters.add(IamInstanceProfile);
                 }
 
-                Parameter InstanceType = new Parameter();
-                InstanceType.setParameterKey("InstanceType");
-                //Note: HardCoded for now, will change in the future if the resource allows the customer to specify instance type.
-                InstanceType.setParameterValue(INSTANCE_TYPE);
-                parameters.add(InstanceType);
+//                Parameter InstanceType = new Parameter();
+//                InstanceType.setParameterKey("InstanceType");
+//                //Note: HardCoded for now, will change in the future if the resource allows the customer to specify instance type.
+//                InstanceType.setParameterValue(INSTANCE_TYPE);
+//                parameters.add(InstanceType);
 
-                if (model.getLogGroup() != null || model.getLogGroup() == "") {
+                if (model.getLogGroup() != null) {
                     Parameter LogGroup = new Parameter();
                     LogGroup.setParameterKey("LogGroup");
                     LogGroup.setParameterValue(model.getLogGroup());
@@ -165,8 +204,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
                 //Dynamically gets both vpcId and subnetId
                 System.out.println(model.toString());
-                if ((model.getSubnetId() == null && model.getSecurityGroupId() == null) ||
-                        (model.getSubnetId() == "" && model.getSecurityGroupId() == "")) { //Check if user provided the subnetId, if not get a default.
+                if ((model.getSubnetId() == null && model.getSecurityGroupId() == null)) { //Check if user provided the subnetId, if not get a default.
                     System.out.println("Inside dynamic creation workflow!");
                     Parameter SubnetId = new Parameter();
                     SubnetId.setParameterKey("SubnetId");
@@ -178,15 +216,27 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     DescribeVpcsRequest describeVpcsRequest = new DescribeVpcsRequest();
                     describeVpcsRequest.withFilters(new Filter("isDefault").withValues("true"));
                     DescribeVpcsResult describeVpcsResult = proxy.<DescribeVpcsRequest,DescribeVpcsResult>injectCredentialsAndInvoke(describeVpcsRequest, ec2::describeVpcs);
-                    String vpcId = describeVpcsResult.getVpcs().get(0).getVpcId();
-                    if (vpcId == null || vpcId.isEmpty()) {
-                        System.out.println("No default VPC found in this region, please specify a subnet using the NetworkConfiguration property.");
+                    // Issue #14, fix for error Index: 0, Size: 0 when trying to .get(0) when it doesn't exist.
+                    String vpcId;
+                    if ( describeVpcsResult.getVpcs().isEmpty()) {
+                        System.out.println("No default VPC found in this region, please specify a subnet using the SubnetId property.");
                         return ProgressEvent.<ResourceModel, CallbackContext>builder()
                                 .status(OperationStatus.FAILED)
                                 .errorCode(HandlerErrorCode.InvalidRequest)
-                                .message("No default VPC found in this region, please specify a subnet using the NetworkConfiguration property.")
+                                .message("No default VPC found in this region, please specify a subnet using the SubnetId property.")
                                 .build();
                     }
+                    try {
+                        vpcId = describeVpcsResult.getVpcs().get(0).getVpcId();
+                    } catch (Exception e) {
+                        System.out.println("No default VPC found in this region, please specify a subnet using the SubnetId property.");
+                        return ProgressEvent.<ResourceModel, CallbackContext>builder()
+                                .status(OperationStatus.FAILED)
+                                .errorCode(HandlerErrorCode.InvalidRequest)
+                                .message("No default VPC found in this region, please specify a subnet using the SubnetId property.")
+                                .build();
+                    }
+
                     VpcId.setParameterValue(vpcId);
                     DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
                     describeSubnetsRequest.withFilters(new Filter("vpc-id").withValues(vpcId));
@@ -206,8 +256,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     parameters.add(VpcId);
                 }
                 //Both are provided
-                else if ((model.getSubnetId() != null && model.getSecurityGroupId() != null) ||
-                        (model.getSubnetId() != "" && model.getSecurityGroupId() != "")) {
+                else if ((model.getSubnetId() != null && model.getSecurityGroupId() != null)) {
                     System.out.println("INSIDE BOTH ARE PROVIDED WORKFLOW.");
                     Parameter SubnetId = new Parameter();
                     SubnetId.setParameterKey("SubnetId");
@@ -221,8 +270,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     parameters.add(SecurityGroupId);
                 }
                 //Subnet is provided, but not SecurityGroup. Infer VPC from Subnet and provide VPCId to CFN Stack
-                else if ((model.getSubnetId() != null && model.getSecurityGroupId() == null) ||
-                        (model.getSubnetId() != "" && model.getSecurityGroupId() == "")) {
+                else if ((model.getSubnetId() != null && model.getSecurityGroupId() == null)) {
                     System.out.println("INSIDE SUBNET PROVIDED NO SECURITY GROUP WORKFLOW.");
                     Parameter SubnetId = new Parameter();
                     SubnetId.setParameterKey("SubnetId");
@@ -242,8 +290,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
                 }
 
-                else if ((model.getSubnetId() == null && model.getSecurityGroupId() != null) ||
-                        (model.getSubnetId() == "") && model.getSecurityGroupId() != "") {
+                else if ((model.getSubnetId() == null && model.getSecurityGroupId() != null)) {
                     System.out.println("No SubnetId provided, when using SecurityGroupId, property SubnetId is required.");
                     return ProgressEvent.<ResourceModel, CallbackContext>builder()
                             .status(OperationStatus.FAILED)
@@ -337,7 +384,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     if (model.getKeyId() != null || model.getKeyId() != "") {
                         parameterRequest.setKeyId(model.getKeyId());
                     }
-                    PutParameterResult parameterResult = proxy.injectCredentialsAndInvoke(parameterRequest, simpleSystemsManagementClient::putParameter);
+                    //Catch for if SSM PutParameter failed due to invalid value in /command-output.txt
+                    try {
+                        PutParameterResult parameterResult = proxy.injectCredentialsAndInvoke(parameterRequest, simpleSystemsManagementClient::putParameter);
+                    } catch (Exception e) {
+                        return ProgressEvent.<ResourceModel, CallbackContext>builder()
+                            .status(OperationStatus.FAILED)
+                            .errorCode(HandlerErrorCode.NotStabilized)
+                            .message("Either the command failed to execute, the value written to /command-output.txt was invalid or the Subnet specified did not have internet access. The value written to /command-output.txt must be a non-empty single word value without quotation marks. Check cloud-init.log in the LogGroup specified for more information.")
+                            .build();
+                    }
 
                     return ProgressEvent.<ResourceModel, CallbackContext>builder()
                             .resourceModel(model)
@@ -345,11 +401,17 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                             .build();
                 }
                 if (stacks.get(0).getStackStatus().equals(StackStatus.CREATE_FAILED.toString()) ||
-                    stacks.get(0).getStackStatus().equals(StackStatus.ROLLBACK_COMPLETE)){
+                    stacks.get(0).getStackStatus().equals(StackStatus.ROLLBACK_COMPLETE.toString())){
+                    //DELETE Stack and terminate EC2 instance.
+                    AmazonCloudFormation stackBuilder = AmazonCloudFormationClientBuilder.standard()
+                            .build();
+                    DeleteStackRequest deleteRequest = new DeleteStackRequest();
+                    deleteRequest.setStackName(stackName);
+                    proxy.injectCredentialsAndInvoke(deleteRequest, stackBuilder::deleteStack);
                     return ProgressEvent.<ResourceModel, CallbackContext>builder()
                             .status(OperationStatus.FAILED)
                             .errorCode(HandlerErrorCode.NotStabilized)
-                            .message("Command failed to execute. Please check CloudWatch Logs and the events in the CommandRunner Stack " + stacks.get(0).getStackName())
+                            .message("Either the command failed to execute, the value written to /command-output.txt was invalid or the Subnet specified did not have internet access. The value written to /command-output.txt must be a non-empty single word value without quotation marks. Check cloud-init.log in the LogGroup specified for more information.")
                             .build();
                 }
 
@@ -365,6 +427,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         }
 
         //It should never reach this code, if it does something went wrong, so it returns internal failure.
+        //Reaches here if callbackContext is not null and it's not of the stack statuses above.
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
                 .status(OperationStatus.FAILED)
                 .errorCode(HandlerErrorCode.InternalFailure)
