@@ -113,8 +113,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                 .build();
                     }
                 }
-                
-                
+
+
 
                 InputStream in = CreateHandler.class.getResourceAsStream("/BaseTemplate.json");
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -130,7 +130,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 reader.close();
                 System.out.println("Creating a stack called " + createRequest.getStackName() + ".");
                 Collection<Parameter> parameters = new LinkedList<>();
-                
+
                 //Timeout Parameter
                 Parameter Timeout = new Parameter();
                 Timeout.setParameterKey("Timeout");
@@ -138,7 +138,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     Timeout.setParameterValue(model.getTimeout());
                     parameters.add(Timeout);
                 }
-                
+
                 //InstanceType Parameter
                 Parameter InstanceType = new Parameter();
                 InstanceType.setParameterKey("InstanceType");
@@ -146,7 +146,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     InstanceType.setParameterValue(model.getInstanceType());
                     parameters.add(InstanceType);
                 }
-                
+
                 Parameter AMIId = new Parameter();
                 AMIId.setParameterKey("AMIId");
 
@@ -167,7 +167,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 parameters.add(Command);
 
                 if (model.getRole() != null) {
-                    
+
                     //Check if Instance Profile exists
                     try {
                         AmazonIdentityManagement iamClient2 = AmazonIdentityManagementClientBuilder.standard().build();
@@ -182,7 +182,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                 .message("The Role property specified is not a valid Instance Profile.")
                                 .build();
                     }
-                    
+
                     Parameter IamInstanceProfile = new Parameter();
                     IamInstanceProfile.setParameterKey("IamInstanceProfile");
                     IamInstanceProfile.setParameterValue(model.getRole());

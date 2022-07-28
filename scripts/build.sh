@@ -1,3 +1,5 @@
+cat banner.txt
+
 set -e
 cfn generate
 mvn -Dmaven.test.skip=true package

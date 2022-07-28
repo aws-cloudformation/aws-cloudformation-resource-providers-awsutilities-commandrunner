@@ -1,5 +1,25 @@
 # AWSUtility::CloudFormation::CommandRunner
 
+### CommandRunner v2.0 is here! 🚀 🚀 🚀
+
+I took all the feedback, issues and feature requests from all our users to create this new major version. All known bugs for CommandRunner have now been fixed!
+
+This version comes with 3 new properties `InstanceType`, `Timeout` and `DisableTerminateInstancesCheck`, improved error handling, logging, reliability, documentation and functionality.
+
+To update to the new version, simply run the following commands in a new directory.
+
+```
+git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
+
+cd aws-cloudformation-resource-providers-awsutilities-commandrunner
+
+curl -LO https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner/releases/latest/download/awsutility-cloudformation-commandrunner.zip
+
+./scripts/register.sh --set-default
+```
+
+For more details, check the [Change Log](#change-log) section below.
+
 ---
 
 # **Table Of Contents**
@@ -11,7 +31,7 @@
     - [Properties](#properties)
     - [Return Values](#return-values)
 - [User Guides](#user-guides)
-    - [Run a Command before or after any Resource](#run-a-command-before-or-after-any-resource)
+    - [Run a Command before or after any Resource](#run-a-command-before-or-after-a-resource)
     - [Run a script in any programming language using any SDK](#run-a-script-in-any-programming-language-using-any-sdk)
     - [Install Packages before Running Command](#install-packages-before-running-command)
     - [Use Cases](#use-cases)
@@ -108,10 +128,12 @@ curl -LO https://github.com/aws-cloudformation/aws-cloudformation-resource-provi
 $ ./scripts/register.sh --set-default
 ```
 
+...And that's it!
+
 Below is an example of a successful registration using the `register.sh` script.
 
 ```text
-$ ./scripts/register.sh 
+$ ./scripts/register.sh
 Creating Execution Role...
 Waiting for execution role stack to complete...
 Waiting for execution role stack to complete...
@@ -277,7 +299,7 @@ The following sample policy can be attached to the IAM User/Role if they do not 
                 "KeyId": "String",
                 "Timeout": "String",
                 "DisableTerminateInstancesCheck": "String",
-                "InstanceType": "String"           
+                "InstanceType": "String"
             }
         }
     }
@@ -407,7 +429,7 @@ Outputs:
    _Type_: String
 
    _Update requires_: Replacement
-   
+
 ### Timeout
 
    By default, the timeout is 600 seconds. To increase the timeout specify a higher Timeout value in seconds. The maximum timeout value is 43200 seconds i.e 12 hours.
@@ -607,7 +629,7 @@ $ ./scripts/build.sh
 ### v2.0
 
 * Updated package versions in pom.xml to latest, fixing build issues related to outdated dependencies.
-* Improved Error Handling 
+* Improved Error Handling
     * For when command fails or when invalid value is written to `/command-output.txt`
         * Error message about checking cloud-init-output.log also includes network related issues.
     * When no default VPC exists.
@@ -628,21 +650,22 @@ $ ./scripts/build.sh
 * Added new `Timeout` property.
     * Timeout property to change timeout in WaitCondition in BaseTemplate, this will give the option to easy fail, by default timeout is 600 right now, this will allow for a max timeout of 12 hours i.e 43200
 * Added new `DisableTerminateInstancesCheck` property.
-    * Some users were running into issues where their SCP policies did not allow the `ec2:TerminateInstances` action, but they still want to create CommandRunner instances. Setting this property to true allows them to create CommandRunner instances even without the `ec2:TerminateInstances` action. 
+    * Some users were running into issues where their SCP policies did not allow the `ec2:TerminateInstances` action, but they still want to create CommandRunner instances. Setting this property to true allows them to create CommandRunner instances even without the `ec2:TerminateInstances` action.
 * Added new `InstanceType` property.
-* Now works in Private Subnets. We had seen some issues where CommandRunner wouldn't work in private subnets, this issue is now resolved. 
+* Now works in Private Subnets. We had seen some issues where CommandRunner wouldn't work in private subnets, this issue is now resolved.
 * Added check for Instance Profile validity. An error is thrown within 5 seconds of resource creation if the Role property specified is not a valid Instance Profile.
     * Check for Instance Profile validity, performs DescribeInstanceProfile and catches the error if it doesn’t exist.
         * https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/identitymanagement/model/GetInstanceProfileResult.html
         * https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/identitymanagement/model/GetInstanceProfileRequest.html
         * Error message: *“*The Role property specified is not a valid Instance Profile.”
-* Added .gitignore to repository, removed unnecessary temporary files. 
+* Added .gitignore to repository, removed unnecessary temporary files.
+* Added the CommandRunner banner to both installation and build scripts.
 * Documentation
     * Fixed typos and grammatical errors.
     * Added new properties to all examples and schemas.
     * Added new properties to documentation.
     * Added new permissions to documentation.
-* Fixed a bug where a fresh installation using register.sh wouldn’t work unless build.sh had been used before it. 
+* Fixed a bug where a fresh installation using register.sh wouldn’t work unless build.sh had been used before it.
 
 
 ### v1.21

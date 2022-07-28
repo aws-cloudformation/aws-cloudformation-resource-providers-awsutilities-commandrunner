@@ -32,6 +32,8 @@ do
     shift
 done
 
+cat banner.txt
+
 # Create Execution Role
 
 echo Creating Execution Role...
@@ -163,5 +165,6 @@ fi
 
 echo ""
 echo "AWSUtility::CloudFormation::CommandRunner is ready to use."
+echo ""
 
 exit 0
