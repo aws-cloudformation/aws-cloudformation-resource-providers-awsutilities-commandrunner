@@ -1,0 +1,4 @@
+.DS_Store
+awsutility-cloudformation-commandrunner.zip
+*.log
+target/

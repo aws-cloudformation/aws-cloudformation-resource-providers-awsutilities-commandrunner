@@ -1,5 +1,25 @@
 # AWSUtility::CloudFormation::CommandRunner
 
+### CommandRunner v2.0 is here! 🚀 🚀 🚀
+
+I took all the feedback, issues and feature requests from all our users to create this new major version. All known bugs for CommandRunner have now been fixed!
+
+This version comes with 3 new properties `InstanceType`, `Timeout` and `DisableTerminateInstancesCheck`, improved error handling, logging, reliability, documentation and functionality.
+
+To update to the new version, simply run the following commands in a new directory.
+
+```
+git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
+
+cd aws-cloudformation-resource-providers-awsutilities-commandrunner
+
+curl -LO https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner/releases/latest/download/awsutility-cloudformation-commandrunner.zip
+
+./scripts/register.sh --set-default
+```
+
+For more details, check the [Change Log](#change-log) section below.
+
 ---
 
 # **Table Of Contents**
@@ -11,7 +31,7 @@
     - [Properties](#properties)
     - [Return Values](#return-values)
 - [User Guides](#user-guides)
-    - [Run a Command before or after any Resource](#run-a-command-before-or-after-any-resource)
+    - [Run a Command before or after any Resource](#run-a-command-before-or-after-a-resource)
     - [Run a script in any programming language using any SDK](#run-a-script-in-any-programming-language-using-any-sdk)
     - [Install Packages before Running Command](#install-packages-before-running-command)
     - [Use Cases](#use-cases)
@@ -38,15 +58,18 @@ Any output written using the command to the reserved file `/command-output.txt` 
 
 ```yaml
 Resources:
-  Command:
+  CommandRunner:
     Type: 'AWSUtility::CloudFormation::CommandRunner'
     Properties:
       Command: aws s3 ls | sed -n 1p | cut -d " " -f3 > /command-output.txt
-      Role: String
+      Role: String #Optional
       LogGroup: String #Optional
       SubnetId: String #Optional
       SecurityGroupId: String #Optional
       KeyId: String #Optional
+      Timeout: String #Optional **NEW**
+      DisableTerminateInstancesCheck: String #Optional **NEW**
+      InstanceType: #Optional **NEW**
 
 Outputs:
     Output:
@@ -82,6 +105,7 @@ s3:PutObject
 cloudformation:RegisterType
 cloudformation:DescribeTypeRegistration
 iam:createRole
+logs:CreateLogGroup
 ```
 
 ---
@@ -104,6 +128,8 @@ curl -LO https://github.com/aws-cloudformation/aws-cloudformation-resource-provi
 $ ./scripts/register.sh --set-default
 ```
 
+...And that's it!
+
 Below is an example of a successful registration using the `register.sh` script.
 
 ```text
@@ -111,27 +137,27 @@ $ ./scripts/register.sh
 Creating Execution Role...
 Waiting for execution role stack to complete...
 Waiting for execution role stack to complete...
-Creating Execution Role complete.
-Creating temporary S3 Bucket f6f8e134b202493297d801183777d92f...
-Creating temporary S3 Bucket f6f8e134b202493297d801183777d92f complete.
-Configuring S3 Bucket Policy for temporary S3 Bucket f6f8e134b202493297d801183777d92f...
-Configuring S3 Bucket Policy for temporary S3 Bucket f6f8e134b202493297d801183777d92f complete.
-Copying Schema Handler Package to temporary S3 Bucket f6f8e134b202493297d801183777d92f...
-Copying Schema Handler Package to temporary S3 Bucket f6f8e134b202493297d801183777d92f complete.
+Waiting for execution role stack to complete...
+Waiting for execution role stack to complete...
+Creating/Updating Execution Role complete.
+Creating temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2...
+Creating temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2 complete.
+Configuring S3 Bucket Policy for temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2...
+Configuring S3 Bucket Policy for temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2 complete.
+Copying Schema Handler Package to temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2...
+Copying Schema Handler Package to temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2 complete.
+Creating CommandRunner Log Group called awsutility-cloudformation-commandrunner-logs2...
+Creating CommandRunner Log Group complete.
 Registering AWSUtility::CloudFormation::CommandRunner to AWS CloudFormation...
-RegistrationToken: 0cd1187e-0a27-405e-8df6-6136605031ee
-Waiting for registration to complete...
-Waiting for registration to complete...
-Waiting for registration to complete...
-Waiting for registration to complete...
+RegistrationToken: 0ae0622e-af3d-463b-9b2d-1d1e5fa41d14
 Waiting for registration to complete...
 Waiting for registration to complete...
 Waiting for registration to complete...
 Waiting for registration to complete...
 Registering AWSUtility::CloudFormation::CommandRunner to AWS CloudFormation complete.
 Cleaning up temporary S3 Bucket...
-Deleting SchemaHandlerPackage from temporary S3 Bucket f6f8e134b202493297d801183777d92f...
-Deleting SchemaHandlerPackage from temporary S3 Bucket f6f8e134b202493297d801183777d92f complete.
+Deleting SchemaHandlerPackage from temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2...
+Deleting SchemaHandlerPackage from temporary S3 Bucket 7c96b969af1c41bfb2bd10f552255ca2 complete.
 Cleaning up temporary S3 Bucket complete.
 
 AWSUtility::CloudFormation::CommandRunner is ready to use.
@@ -148,9 +174,13 @@ cloudformation:DescribeStacks
 
 logs:CreateLogStream
 logs:DescribeLogGroups
+logs:PutLogEvents
+
+cloudwatch:PutMetricData
 
 ssm:GetParameter
 ssm:PutParameter
+ssm:DeleteParameter
 
 ec2:DescribeSubnets
 ec2:DescribeVpcs
@@ -165,11 +195,16 @@ ec2:RunInstances
 ec2:DescribeInstances
 ec2:TerminateInstances
 ec2:DeleteSecurityGroup
+
 iam:PassRole
+iam:GetInstanceProfile
+iam:SimulatePrincipalPolicy
 
 #Only required if using the KeyId property, i.e custom KMS Key for the SSM SecureString
 kms:Encrypt
 kms:Decrypt
+
+sts:GetCallerIdentity
 ```
 
 - Runs the `aws s3 mb` AWS CLI command to create an S3 bucket with the name specified.
@@ -198,6 +233,7 @@ kms:Decrypt
 ```
 
 - Runs the `aws s3 cp` AWS CLI command to copy the SchemaHandlerPackage `awsutility-cloudformation-commandrunner.zip` into the S3 bucket.
+- Runs the `aws logs create-log-group` AWS CLI command to create the Log Group or skip it if it already exists.
 - Runs the `aws cloudformation register-type` AWS CLI command to register the `AWSUtility::CloudFormation::CommandRunner` resource to CloudFormation.
 - Cleans up the temporary S3 bucket created during registration.
 
@@ -252,15 +288,18 @@ The following sample policy can be attached to the IAM User/Role if they do not 
 ```json
 {
     "Resources": {
-        "Command": {
+        "CommandRunner": {
             "Type": "AWSUtility::CloudFormation::CommandRunner",
             "Properties": {
                 "Command": "String",
                 "Role": "String",
                 "LogGroup": "String",
                 "SubnetId": "String",
-                "SecurityGroupId" "String",
-                "KeyId" "String"
+                "SecurityGroupId": "String",
+                "KeyId": "String",
+                "Timeout": "String",
+                "DisableTerminateInstancesCheck": "String",
+                "InstanceType": "String"
             }
         }
     }
@@ -271,15 +310,18 @@ The following sample policy can be attached to the IAM User/Role if they do not 
 
 ```yaml
 Resources:
-  Command:
+  CommandRunner:
     Type: 'AWSUtility::CloudFormation::CommandRunner'
     Properties:
       Command: String
-      Role: String
+      Role: String #Optional
       LogGroup: String #Optional
       SubnetId: String #Optional
       SecurityGroupId: String #Optional
       KeyId: String #Optional
+      Timeout: String #Optional **NEW**
+      DisableTerminateInstancesCheck: String #Optional **NEW**
+      InstanceType: #Optional **NEW**
 
 Outputs:
     Output:
@@ -354,7 +396,7 @@ Outputs:
 
 ### SubnetId
 
-   The Id of the Subnet to execute the command in.
+   The Id of the Subnet to execute the command in. Note that the SubnetId specified should have access to the internet to be able to communicate back to CloudFormation. Ensure that the Route Table associated with the Subnet has a route to the internet via either an Internet Gateway (IGW) or a NAT Gateway (NGW).
 
    #### Note:
    If the `SubnetID` is not specified, it will create the resource in a subnet in the default VPC of the region.
@@ -381,6 +423,36 @@ Outputs:
 ### KeyId
 
    Id of the KMS key to use when encrypting the output stored in SSM Parameter Store. If not specified, the account's default KMS key is used.
+
+   _Required_: No
+
+   _Type_: String
+
+   _Update requires_: Replacement
+
+### Timeout
+
+   By default, the timeout is 600 seconds. To increase the timeout specify a higher Timeout value in seconds. The maximum timeout value is 43200 seconds i.e 12 hours.
+
+   _Required_: No
+
+   _Type_: String
+
+   _Update requires_: Replacement
+
+### DisableTerminateInstancesCheck
+
+   By default, CommandRunner checks to see if the execution role can perform a TerminateInstances API call. Set this property to true if you want to skip the check. Note that this means that the CommandRunner instance may not be terminated and will have to be terminated manually.
+
+   _Required_: No
+
+   _Type_: String
+
+   _Update requires_: Replacement
+
+### InstanceType
+
+   By default, the instance type used is t2.medium. However you can use this property to specify any supported instance type.
 
    _Required_: No
 
@@ -488,6 +560,8 @@ Outputs:
 
 - Currently, there is no way to create an image (AMI) using a running EC2 instance, but it can be done using the AWSUtility::CloudFormation::CommandRunner resource by using the `aws ec2 create-image` CLI command.
 
+- Add a lag between resources using CommandRunner. Specify a sleep command in the Command property.
+
 ---
 
 # FAQ
@@ -528,20 +602,71 @@ Once the script finishes, the AWSUtility::CloudFormation::CommandRunner resource
 
 You can find an example of how to use the resource in the file `usage-template.yaml`.
 
-The recommended versions and dependencies are as below.
+As of July 2022, the recommended versions and dependencies for the build are as follows.
 ```
-aws-cli/1.16.209 and above.
-Python/2.7.16 Darwin/18.7.0 botocore/1.13.30
-Apache Maven 3.6.3 and above.
-Java version: 13.0.2
-cfn 0.1.2
-jq-1.6
+$ cfn --version
+cfn 0.2.24
 
+$ mvn -version
+Apache Maven 3.6.3 (cecedd343002696d0abb50b32b541b8a6ba2883f)
+Maven home: /Users/shantgup/Downloads/mvn
+Java version: 15.0.2, vendor: AdoptOpenJDK, runtime: /Library/Java/JavaVirtualMachines/adoptopenjdk-15.jdk/Contents/Home
+Default locale: en_US, platform encoding: UTF-8
+OS name: "mac os x", version: "10.16", arch: "x86_64", family: "mac"
+
+$ java -version
+openjdk version "15.0.2" 2021-01-19
+OpenJDK Runtime Environment AdoptOpenJDK (build 15.0.2+7)
+OpenJDK 64-Bit Server VM AdoptOpenJDK (build 15.0.2+7, mixed mode, sharing)
+
+$ ./scripts/build.sh
 ```
 
 ---
 
 # Change Log
+
+### v2.0
+
+* Updated package versions in pom.xml to latest, fixing build issues related to outdated dependencies.
+* Improved Error Handling
+    * For when command fails or when invalid value is written to `/command-output.txt`
+        * Error message about checking cloud-init-output.log also includes network related issues.
+    * When no default VPC exists.
+        * Added try catch block for catching exception if no default VPC.
+        * Error message - "No default VPC found in this region, please specify a subnet using the SubnetId property."
+* Improved logging
+    * Added contents of  `/command-output.txt` to CloudWatch logs under `cloud-init-output.log`.
+    * Updated BaseTemplate to add contents of /command-output.txt to cloudwatch logs.
+* Added catch for failures on CommandRunner stack.
+    * Failure on CommandRunner stack was not being caught when response sent to CommandRunner stack in WaitCondition is malformed.
+    * Failures are now caught right away, if CommandRunner stack goes into ROLLBACK_COMPLETE, or ROLLBACK_FAILED, then it will now gracefully clean up the CommandRunner stack.
+* Updated user installation script `register.sh`
+    * Added creation of log group in `register.sh`, along with handling the case where it already exists.
+    * LogGroup not created for new region, line 103 of register.sh check if log-group exists if not, create one.
+    * register.sh will try to create a fresh execution role stack, if it exists it will try to update it, if it is up to date it will skip it.
+* Fixed bugs with networking configuration properties i.e `SubnetId`, `SecurityGroupId`
+    * Removed empty string checks, now all different scenarios with/without SubnetId, SecurityGroupId work.
+* Added new `Timeout` property.
+    * Timeout property to change timeout in WaitCondition in BaseTemplate, this will give the option to easy fail, by default timeout is 600 right now, this will allow for a max timeout of 12 hours i.e 43200
+* Added new `DisableTerminateInstancesCheck` property.
+    * Some users were running into issues where their SCP policies did not allow the `ec2:TerminateInstances` action, but they still want to create CommandRunner instances. Setting this property to true allows them to create CommandRunner instances even without the `ec2:TerminateInstances` action.
+* Added new `InstanceType` property.
+* Now works in Private Subnets. We had seen some issues where CommandRunner wouldn't work in private subnets, this issue is now resolved.
+* Added check for Instance Profile validity. An error is thrown within 5 seconds of resource creation if the Role property specified is not a valid Instance Profile.
+    * Check for Instance Profile validity, performs DescribeInstanceProfile and catches the error if it doesn’t exist.
+        * https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/identitymanagement/model/GetInstanceProfileResult.html
+        * https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/identitymanagement/model/GetInstanceProfileRequest.html
+        * Error message: *“*The Role property specified is not a valid Instance Profile.”
+* Added .gitignore to repository, removed unnecessary temporary files.
+* Added the CommandRunner banner to both installation and build scripts.
+* Documentation
+    * Fixed typos and grammatical errors.
+    * Added new properties to all examples and schemas.
+    * Added new properties to documentation.
+    * Added new permissions to documentation.
+* Fixed a bug where a fresh installation using register.sh wouldn’t work unless build.sh had been used before it.
+
 
 ### v1.21
 
@@ -642,4 +767,6 @@ kms:Decrypt
 
 # See Also
 
-We are currently in the process of writing an AWS Blog about this resource as well as creating an AWS Samples repository for solutions created using this resource.
+[AWS Blogs - AWS Cloud Operations & Migrations Blog - Running bash commands in AWS CloudFormation templates](https://aws.amazon.com/blogs/mt/running-bash-commands-in-aws-cloudformation-templates/)
+
+[AWS Premium Support - Knowledge Center - CloudFormation - How do I use AWSUtility::CloudFormation::CommandRunner to run a command before or after a resource in my CloudFormation stack?](https://aws.amazon.com/blogs/mt/running-bash-commands-in-aws-cloudformation-templates/)

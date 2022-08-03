@@ -17,7 +17,10 @@ To declare this entity in your AWS CloudFormation template, use the following sy
         "<a href="#loggroup" title="LogGroup">LogGroup</a>" : <i>String</i>,
         "<a href="#subnetid" title="SubnetId">SubnetId</a>" : <i>String</i>,
         "<a href="#keyid" title="KeyId">KeyId</a>" : <i>String</i>,
-        "<a href="#securitygroupid" title="SecurityGroupId">SecurityGroupId</a>" : <i>String</i>
+        "<a href="#securitygroupid" title="SecurityGroupId">SecurityGroupId</a>" : <i>String</i>,
+        "<a href="#disableterminateinstancescheck" title="DisableTerminateInstancesCheck">DisableTerminateInstancesCheck</a>" : <i>String</i>,
+        "<a href="#timeout" title="Timeout">Timeout</a>" : <i>String</i>,
+        "<a href="#instancetype" title="InstanceType">InstanceType</a>" : <i>String</i>
     }
 }
 </pre>
@@ -33,6 +36,9 @@ Properties:
     <a href="#subnetid" title="SubnetId">SubnetId</a>: <i>String</i>
     <a href="#keyid" title="KeyId">KeyId</a>: <i>String</i>
     <a href="#securitygroupid" title="SecurityGroupId">SecurityGroupId</a>: <i>String</i>
+    <a href="#disableterminateinstancescheck" title="DisableTerminateInstancesCheck">DisableTerminateInstancesCheck</a>: <i>String</i>
+    <a href="#timeout" title="Timeout">Timeout</a>: <i>String</i>
+    <a href="#instancetype" title="InstanceType">InstanceType</a>: <i>String</i>
 </pre>
 
 ## Properties
@@ -90,6 +96,36 @@ _Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormati
 #### SecurityGroupId
 
 Id of the Security Group to attach to the instance the command is run in. If using SecurityGroup, SubnetId is required.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### DisableTerminateInstancesCheck
+
+By default, CommandRunner checks to see if the execution role can perform a TerminateInstances API call. Set this property to true if you want to skip the check. Note that this means that the CommandRunner instance may not be terminated and will have to be terminated manually.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### Timeout
+
+By default, the timeout is 600 seconds. To increase the timeout specify a higher Timeout value in seconds. Maximum timeout value is 43200 seconds i.e 12 hours.
+
+_Required_: No
+
+_Type_: String
+
+_Update requires_: [No interruption](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-update-behaviors.html#update-no-interrupt)
+
+#### InstanceType
+
+By default, the instance type used is t2.medium. However you can use this property to specify any supported instance type.
 
 _Required_: No
 

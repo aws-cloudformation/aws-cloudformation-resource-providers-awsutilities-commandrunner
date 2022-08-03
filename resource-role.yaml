@@ -15,6 +15,7 @@ Resources:
             Principal:
               Service: resources.cloudformation.amazonaws.com
             Action: sts:AssumeRole
+
       Path: "/"
       Policies:
         - PolicyName: ResourceTypePolicy
@@ -39,13 +40,15 @@ Resources:
                 - "ec2:RevokeSecurityGroupIngress"
                 - "ec2:RunInstances"
                 - "ec2:TerminateInstances"
+                - "iam:GetInstanceProfile"
                 - "iam:PassRole"
                 - "iam:SimulatePrincipalPolicy"
                 - "kms:Decrypt"
                 - "kms:Encrypt"
                 - "logs:CreateLogStream"
                 - "logs:DescribeLogGroups"
-                - "logs:PutMetricData"
+                - "log:PutLogEvents"
+                - "cloudwatch:PutMetricData"
                 - "ssm:DeleteParameter"
                 - "ssm:GetParameter"
                 - "ssm:PutParameter"

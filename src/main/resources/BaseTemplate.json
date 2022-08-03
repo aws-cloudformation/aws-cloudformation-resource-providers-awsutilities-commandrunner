@@ -3,6 +3,10 @@
     "SubnetId": {
       "Type": "AWS::EC2::Subnet::Id"
     },
+    "Timeout": {
+      "Type": "String",
+      "Default": "600"
+    },
     "AMIId": {
       "Type": "String",
       "Default": "ami-062f7200baf2fa504"
@@ -126,7 +130,7 @@
       "Properties": {
         "UserData": {
           "Fn::Base64": {
-            "Fn::Sub": "#!/bin/bash\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region}\n${Command}\n/opt/aws/bin/cfn-signal -r 'Command ran successfully.' -e 0 --id 'Command Output' --data \"$(cat /command-output.txt)\" '${WaitConditionHandle}'\n"
+            "Fn::Sub": "#!/bin/bash\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region}\n${Command}\n/opt/aws/bin/cfn-signal -r 'Command ran successfully.' -e 0 --id 'Command Output' --data \"$(cat /command-output.txt)\" '${WaitConditionHandle}'\necho Contents of /command-output.txt = $(cat /command-output.txt)"
           }
         },
         "InstanceType": {
@@ -174,7 +178,9 @@
         "Handle": {
           "Ref": "WaitConditionHandle"
         },
-        "Timeout": 600
+        "Timeout": {
+          "Ref": "Timeout"
+        }
       }
     }
   },
