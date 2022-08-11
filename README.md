@@ -62,8 +62,8 @@ Resources:
     Type: 'AWSUtility::CloudFormation::CommandRunner'
     Properties:
       Command: aws s3 ls | sed -n 1p | cut -d " " -f3 > /command-output.txt
-      Role: String #Optional
-      LogGroup: String #Optional
+      Role: String #Required
+      LogGroup: String #Required
       SubnetId: String #Optional
       SecurityGroupId: String #Optional
       KeyId: String #Optional
@@ -74,7 +74,7 @@ Resources:
 Outputs:
     Output:
         Description: The output of the CommandRunner.
-        Value: !GetAtt Command.Output
+        Value: !GetAtt CommandRunner.Output
 ```
 *Note: In the above example, `sed -n 1p` prints only the first line from the response returned by `aws s3 ls`. To get the bucket name, `sed -n 1p` pipes the response to `cut -d " " -f3`, which chooses the third element in the array created after splitting the line delimited by a space.*
 
