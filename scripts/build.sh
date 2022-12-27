@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cat banner.txt
 
 set -e

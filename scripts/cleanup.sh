@@ -1,4 +1,6 @@
-region=`aws configure get region`
+#!/bin/bash
+
+region=$(aws configure get region)
 if [ -z "$region" ]; then
   echo "No region configured, please configure a default region using aws configure."
   exit
@@ -30,19 +32,19 @@ stack_name='awsutility-cloudformation-commandrunner-execution-role-stack'
 
 echo "Checking if Execution Role exists..."
 
-describe_result=`aws cloudformation describe-stacks --stack-name $stack_name 2>&1`
+describe_result=$(aws cloudformation describe-stacks --stack-name $stack_name 2>&1)
 
-if ! [ $? -eq 0 ]; then
+if ! $describe_result; then
     echo "Execution role does not exist."
     echo "Deleting Execution Role skipped."
 else
     echo "Execution role exists."
     echo "Deleting Execution Role..."
-    result=`aws cloudformation delete-stack --stack-name $stack_name 2>&1`
-    if [ $? -eq 0 ]; then
+    result=$(aws cloudformation delete-stack --stack-name $stack_name 2>&1)
+    if $result; then
         echo "Deleting Execution Role complete."
     else
-        echo $result
+        echo "$result"
     fi
 fi
 
@@ -54,23 +56,23 @@ type_name='AWSUtility::CloudFormation::CommandRunner'
 version='00000001'
 count=1
 
-while [ $version != "00000099" ]
+while [ "$version" != "00000099" ]
 do
-    echo "Deregistering version "$version...
-    command=`aws cloudformation deregister-type --version-id $version --type RESOURCE --type-name $type_name --region $region 2>&1`
-    if [ $? -eq 0 ]; then
-        echo "Deregistering version "$version complete.
+    echo "Deregistering version $version..."
+    command=$(aws cloudformation deregister-type --version-id "$version" --type RESOURCE --type-name $type_name --region "$region" 2>&1)
+    if $command; then
+        echo "Deregistering version $version complete".
     else
         if [[ $command == *"error"* ]]; then
-            aws cloudformation deregister-type --type RESOURCE --type-name $type_name --region $region
-            echo Successfully deregistered $type_name from region $region.
+            aws cloudformation deregister-type --type RESOURCE --type-name $type_name --region "$region"
+            echo Successfully deregistered $type_name from region "$region".
             exit 0
         else
-            echo $command
+            echo "$command"
             exit 1
         fi
     fi
-    count=`expr $count + 1`
+    count=$(("$count" + 1))
     if [ $count -lt 10 ]; then
         version='0000000'$count
     fi
