@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2181
 
 #if [ $# == 0 ]; then
 #  echo "Usage: $0 --bucket-name <BUCKET_NAME>"
@@ -44,7 +45,7 @@ role_stack_id=$(aws cloudformation create-stack --stack-name awsutility-cloudfor
 if ! $role_stack_id; then
     #Check if any updates can be made if it already exists
     role_stack_id=$(aws cloudformation update-stack --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --template-body file://resource-role.yaml --capabilities CAPABILITY_IAM --query StackId --output text 2>> registration_logs.log)
-    if ! $role_stack_id; then
+    if ! [ $? -eq 0 ]; then
         echo Execution role already exists, no changes to be made.
         echo Creating Execution Role skipped.
     else
@@ -77,9 +78,9 @@ execution_role_arn=$(aws cloudformation describe-stacks --stack-name awsutility-
 bucket_name=$(uuidgen | tr '[:upper:]' '[:lower:]' | tr -d '-')
 
 # Create a bucket always as it will be cleaned up after installation.
-echo Creating temporary S3 Bucket "$bucket_name"...
+echo "Creating temporary S3 Bucket $bucket_name..."
 mb_result=$(aws s3 mb s3://"$bucket_name" --region "$region" 2>&1)
-if mb_result; then
+if [ $? -eq 0 ]; then
     echo Creating temporary S3 Bucket "$bucket_name" complete.
 else
     if [[ $mb_result == *"BucketAlreadyOwnedByYou"* ]]; then
@@ -109,8 +110,9 @@ echo Copying Schema Handler Package to temporary S3 Bucket "$bucket_name" comple
 #CFN Registration
 
 echo Creating CommandRunner Log Group called awsutility-cloudformation-commandrunner-logs2...
+# shellcheck disable=SC2034
 log_group=$(aws logs create-log-group --log-group-name awsutility-cloudformation-commandrunner-logs2 2>> registration_logs.log)
-if ! $log_group; then
+if ! [ $? -eq 0 ]; then
     echo "Command Runner Log Group already exists, no changes to be made."
     echo "Creating CommandRunner Log Group skipped."
 else
