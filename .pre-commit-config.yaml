@@ -1,19 +1,23 @@
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.4.0
-  hooks:
-  - id: check-case-conflict
-  - id: detect-private-key
-  - id: end-of-file-fixer
-  - id: mixed-line-ending
-    args:
-    - --fix=lf
-  - id: trailing-whitespace
-  - id: pretty-format-json
-    args:
-    - --autofix
-    - --indent=2
-    - --no-sort-keys
-  - id: check-merge-conflict
-  - id: check-yaml
-    exclude: codebuild-ci.yaml
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: trailing-whitespace
+      - id: pretty-format-json
+        args:
+          - --autofix
+          - --indent=2
+          - --no-sort-keys
+      - id: check-merge-conflict
+      - id: check-yaml
+        exclude: codebuild-ci.yaml
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.9.0
+    hooks:
+      - id: shellcheck
