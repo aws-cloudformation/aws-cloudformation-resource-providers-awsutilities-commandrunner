@@ -74,7 +74,8 @@ do
             exit 1
         fi
     fi
-    count=$(("$count" + 1))
+
+    count=$((count + 1))
     if [ $count -lt 10 ]; then
         version='0000000'$count
     fi

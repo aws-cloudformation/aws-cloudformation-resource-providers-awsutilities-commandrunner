@@ -42,7 +42,8 @@ cat banner.txt
 echo Creating Execution Role...
 role_stack_id=$(aws cloudformation create-stack --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --template-body file://resource-role.yaml --capabilities CAPABILITY_IAM --query StackId --output text 2>> registration_logs.log)
 
-if ! $role_stack_id; then
+if ! [ $? -eq 0 ]; then
+    # shellcheck disable=SC2034
     #Check if any updates can be made if it already exists
     role_stack_id=$(aws cloudformation update-stack --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --template-body file://resource-role.yaml --capabilities CAPABILITY_IAM --query StackId --output text 2>> registration_logs.log)
     if ! [ $? -eq 0 ]; then
@@ -149,7 +150,7 @@ done
 echo "Cleaning up temporary S3 Bucket..."
 echo "Deleting SchemaHandlerPackage from temporary S3 Bucket $bucket_name..."
 rm_result=$(aws s3 rm s3://"$bucket_name"/awsutility-cloudformation-commandrunner.zip 2>&1)
-if $rm_result; then
+if [ $? -eq 0 ]; then
     echo "Deleting SchemaHandlerPackage from temporary S3 Bucket $bucket_name complete."
 else
         echo Deleting SchemaHandlerPackage from temporary S3 Bucket "$bucket_name" failed, please delete it manually.
@@ -158,7 +159,7 @@ else
         exit 1
 fi
 rb_result=$(aws s3 rb s3://"$bucket_name" 2>&1)
-if $rb_result; then
+if [ $? -eq 0 ]; then
     echo Cleaning up temporary S3 Bucket complete.
 else
         echo Cleaning up temporary S3 Bucket "$bucket_name" failed, please delete it manually.
