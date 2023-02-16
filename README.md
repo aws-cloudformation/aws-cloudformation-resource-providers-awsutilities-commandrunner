@@ -44,9 +44,9 @@ For more details, check the [Change Log](#change-log) section below.
 
 # Introduction
 
-AWSUtility::CloudFormation::CommandRunner is a CloudFormation resource type created using the recently released CloudFormation Resource Providers framework.
+`AWSUtility::CloudFormation::CommandRunner` is a CloudFormation resource type created using the recently released CloudFormation Resource Providers framework.
 
-The AWSUtility::CloudFormation::CommandRunner resource allows users to run Bash commands in any CloudFormation stack.
+The `AWSUtility::CloudFormation::CommandRunner` resource allows users to run Bash commands in any CloudFormation stack.
 
 This allows for unlimited customization such as executing AWS CLI/API calls, running scripts in any language, querying databases, doing external REST API calls, cleanup routines, validations, dynamically referencing parameters and just about anything that can be done using the shell on an EC2 instance.
 
@@ -54,11 +54,11 @@ The `AWSUtility::CloudFormation::CommandRunner` resource runs any command provid
 
 `AWSUtility::CloudFormation::CommandRunner` can be used to perform inside your CloudFormation stack, any API call, script, custom logic, external check, conditions, cleanup, dynamic parameter retrieval and just about anything that can be done using a command.
 
-Any output written using the command to the reserved file `/command-output.txt` can be referenced anywhere in your template by using `!Fn::GetAtt Command.Output` like below, where `Command` is the logical name of the `AWSUtility::CloudFormation::CommandRunner`resource.
+Any output written using the command to the reserved file `/command-output.txt` can be referenced anywhere in your template by using `!Fn::GetAtt MyCommand.Output` like below, where `Command` is the logical name of the `AWSUtility::CloudFormation::CommandRunner`resource.
 
 ```yaml
 Resources:
-  CommandRunner:
+  MyCommand:
     Type: 'AWSUtility::CloudFormation::CommandRunner'
     Properties:
       Command: aws s3 ls | sed -n 1p | cut -d " " -f3 > /command-output.txt
@@ -74,7 +74,7 @@ Resources:
 Outputs:
     Output:
         Description: The output of the CommandRunner.
-        Value: !GetAtt Command.Output
+        Value: !GetAtt MyCommand.Output
 ```
 *Note: In the above example, `sed -n 1p` prints only the first line from the response returned by `aws s3 ls`. To get the bucket name, `sed -n 1p` pipes the response to `cut -d " " -f3`, which chooses the third element in the array created after splitting the line delimited by a space.*
 
