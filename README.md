@@ -479,6 +479,25 @@ Outputs:
 
 # User Guides
 
+## Run A Multi-Line Script
+
+```yaml
+Resources:
+   CommandRunner:
+      Type: AWSUtility::CloudFormation::CommandRunner
+      Properties:
+         Command: 
+            Fn::Sub: |
+                echo "my log"
+                echo '{"key":"value"}' > mydata.json  
+                ...
+                <ANY OTHER COMMANDS>
+                ...
+                echo success > /command-output.txt
+         LogGroup: my-cloudwatch-log-group
+         Role: MyEC2InstanceProfile
+```
+
 ## Run A Command Before Or After A Resource
 
 To run the command after a resource with logical name `Resource`, specify `DependsOn: Resource` in the AWSUtility::CloudFormation::CommandRunner resource's definition.
@@ -489,9 +508,9 @@ Resources:
       DependsOn: Resource
       Type: AWSUtility::CloudFormation::CommandRunner
       Properties:
-         Command: aws s3 ls > /command-output.txt
+         Command: echo success > /command-output.txt
          LogGroup: my-cloudwatch-log-group
-         Role: EC2-Role
+         Role: MyEC2InstanceProfile
    Resource:
       Type: AWS::EC2::Instance
       Properties:
@@ -505,9 +524,9 @@ Resources:
    Command:
       Type: AWSUtility::CloudFormation::CommandRunner
       Properties:
-         Command: aws s3 ls > /command-output.txt
+         Command: echo success > /command-output.txt
          LogGroup: my-cloudwatch-log-group
-         Role: EC2-Role
+         Role: MyEC2InstanceProfile
    Resource:
       DependsOn: Command
       Type: AWS::EC2::Instance
@@ -525,7 +544,7 @@ Resources:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
             Command: 'aws s3 cp s3://cfn-cli-project/S3BucketCheck.py . && python S3BucketCheck.py my-bucket third-name-option-a'
-            Role: EC2AdminRole
+            Role: MyEC2InstanceProfile
             LogGroup: my-cloudwatch-log-group
 Outputs:
     Output:
@@ -540,8 +559,31 @@ Resources:
     Command:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
-            Command: 'yum install jq -y && aws ssm get-parameter --name RepositoryName --region us-east-1 | jq -r .Parameter.Value > /command-output.txt'
-            Role: EC2AdminRole
+            Command: 
+                Fn::Sub: |
+                    yum install jq -y
+                    aws ssm get-parameter --name RepositoryName --region us-east-1 > response.json
+                    jq -r .Parameter.Value response.json > /command-output.txt'
+            Role: MyEC2InstanceProfile
+            LogGroup: my-cloudwatch-log-group
+Outputs:
+    Output:
+        Description: The output of the command.
+        Value: !GetAtt Command.Output
+```
+
+
+## Using AWSCLI --query option 
+
+```yaml
+Resources:
+    Command:
+        Type: AWSUtility::CloudFormation::CommandRunner
+        Properties:
+            Command: 
+                Fn::Sub: |
+                    aws ssm get-parameter --name RepositoryName --region us-east-1 --query Parameter.Value --output text > /command-output.txt
+            Role: MyEC2InstanceProfile
             LogGroup: my-cloudwatch-log-group
 Outputs:
     Output:
