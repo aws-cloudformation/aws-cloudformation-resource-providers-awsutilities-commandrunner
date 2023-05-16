@@ -47,7 +47,7 @@ Resources:
                 - "kms:Encrypt"
                 - "logs:CreateLogStream"
                 - "logs:DescribeLogGroups"
-                - "log:PutLogEvents"
+                - "logs:PutLogEvents"
                 - "cloudwatch:PutMetricData"
                 - "ssm:DeleteParameter"
                 - "ssm:GetParameter"
