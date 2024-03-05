@@ -19,9 +19,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.awsutility.cloudformation.commandrunner.CallbackContext;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,9 +46,10 @@ public class ReadHandlerTest {
     private Logger logger;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class, Mockito.RETURNS_DEEP_STUBS);
-//        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), any())).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue(EXPECTED_OUTPUT)));
+        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), any(Function.class))).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue(EXPECTED_OUTPUT)));
         logger = mock(Logger.class, Mockito.RETURNS_DEEP_STUBS);
     }
 
@@ -70,12 +73,12 @@ public class ReadHandlerTest {
             = handler.handleRequest(proxy, request, context, logger);
 
         assertThat(response).isNotNull();
-//        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-//        assertThat(response.getCallbackContext()).isNull();
-//        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-//        assertThat(response.getResourceModel().getOutput()).isEqualTo(EXPECTED_OUTPUT);
-//        assertThat(response.getResourceModels()).isNull();
-//        assertThat(response.getMessage()).isNotNull();
-//        assertThat(response.getErrorCode()).isNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel().getOutput()).isEqualTo(EXPECTED_OUTPUT);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNotNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 }

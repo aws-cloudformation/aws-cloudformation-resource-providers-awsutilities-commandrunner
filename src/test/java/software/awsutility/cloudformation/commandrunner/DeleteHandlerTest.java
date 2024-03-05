@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.util.function.Function;
 
 @ExtendWith(MockitoExtension.class)
 public class DeleteHandlerTest {
@@ -31,9 +32,10 @@ public class DeleteHandlerTest {
     private Logger logger;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
-//        when(proxy.injectCredentialsAndInvoke(any(DeleteParameterRequest.class), any())).thenReturn(new DeleteParameterResult());
+        when(proxy.injectCredentialsAndInvoke(any(DeleteParameterRequest.class), any(Function.class))).thenReturn(new DeleteParameterResult());
         logger = mock(Logger.class);
     }
 
@@ -51,12 +53,12 @@ public class DeleteHandlerTest {
             = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-//        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-//        assertThat(response.getCallbackContext()).isNull();
-//        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-//        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
-//        assertThat(response.getResourceModels()).isNull();
-//        assertThat(response.getMessage()).isNull();
-//        assertThat(response.getErrorCode()).isNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
     }
 }
