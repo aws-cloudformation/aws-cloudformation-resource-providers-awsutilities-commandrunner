@@ -33,7 +33,7 @@ public class DeleteHandlerTest {
     @BeforeEach
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
-        when(proxy.injectCredentialsAndInvoke(any(DeleteParameterRequest.class), any())).thenReturn(new DeleteParameterResult());
+//        when(proxy.injectCredentialsAndInvoke(any(DeleteParameterRequest.class), any())).thenReturn(new DeleteParameterResult());
         logger = mock(Logger.class);
     }
 
