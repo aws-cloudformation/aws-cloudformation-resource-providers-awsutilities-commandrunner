@@ -486,10 +486,10 @@ Resources:
    CommandRunner:
       Type: AWSUtility::CloudFormation::CommandRunner
       Properties:
-         Command: 
+         Command:
             Fn::Sub: |
                 echo "my log"
-                echo '{"key":"value"}' > mydata.json  
+                echo '{"key":"value"}' > mydata.json
                 ...
                 <ANY OTHER COMMANDS>
                 ...
@@ -559,7 +559,7 @@ Resources:
     Command:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
-            Command: 
+            Command:
                 Fn::Sub: |
                     yum install jq -y
                     aws ssm get-parameter --name RepositoryName --region us-east-1 > response.json
@@ -573,14 +573,14 @@ Outputs:
 ```
 
 
-## Using AWSCLI --query option 
+## Using AWSCLI --query option
 
 ```yaml
 Resources:
     Command:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
-            Command: 
+            Command:
                 Fn::Sub: |
                     aws ssm get-parameter --name RepositoryName --region us-east-1 --query Parameter.Value --output text > /command-output.txt
             Role: MyEC2InstanceProfile
