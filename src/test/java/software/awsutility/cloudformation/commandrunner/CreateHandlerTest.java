@@ -85,7 +85,7 @@ public class CreateHandlerTest {
 //            assertThat(response.getMessage()).isNull();
 //            assertThat(response.getErrorCode()).isNull();
             request.setDesiredResourceState(request.getDesiredResourceState());
-            System.out.println(response.getCallbackContext().getStackName());
+//            System.out.println(response.getCallbackContext().getStackName());
             final ProgressEvent<ResourceModel, CallbackContext> nextResponse = handler.handleRequest(proxy, request, response.getCallbackContext(), logger);
 
             //CREATE_COMPLETE ASSERTS

@@ -11,12 +11,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: software.awsutility.cloudformation.commandrunner.HandlerWrapper::handleRequest
-      Runtime: java17
+      Runtime: java8.al2
       CodeUri: ./target/awsutility-cloudformation-commandrunner-handler-1.0-SNAPSHOT.jar
 
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
       Handler: software.awsutility.cloudformation.commandrunner.HandlerWrapper::testEntrypoint
-      Runtime: java17
+      Runtime: java8.al2
       CodeUri: ./target/awsutility-cloudformation-commandrunner-handler-1.0-SNAPSHOT.jar

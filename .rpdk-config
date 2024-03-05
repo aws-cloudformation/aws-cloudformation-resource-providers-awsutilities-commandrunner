@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWSUtility::CloudFormation::CommandRunner",
     "language": "java",
-    "runtime": "java17",
+    "runtime": "java8.al2",
     "entrypoint": "software.awsutility.cloudformation.commandrunner.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.awsutility.cloudformation.commandrunner.HandlerWrapper::testEntrypoint",
     "settings": {
