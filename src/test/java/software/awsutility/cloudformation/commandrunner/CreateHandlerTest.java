@@ -83,27 +83,27 @@ public class CreateHandlerTest {
             final ProgressEvent<ResourceModel, CallbackContext> response
                     = handler.handleRequest(proxy, request, null, logger);
             //IN_PROGRESS ASSERTS
-//            assertThat(response).isNotNull();
-//            assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-//            assertThat(response.getCallbackContext()).isNotNull();
-//            assertThat(response.getCallbackDelaySeconds()).isEqualTo(90);
-//            assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
-//            assertThat(response.getResourceModels()).isNull();
-//            assertThat(response.getMessage()).isNull();
-//            assertThat(response.getErrorCode()).isNull();
+            assertThat(response).isNotNull();
+            assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
+            assertThat(response.getCallbackContext()).isNotNull();
+            assertThat(response.getCallbackDelaySeconds()).isEqualTo(90);
+            assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+            assertThat(response.getResourceModels()).isNull();
+            assertThat(response.getMessage()).isNull();
+            assertThat(response.getErrorCode()).isNull();
             request.setDesiredResourceState(request.getDesiredResourceState());
-//            System.out.println(response.getCallbackContext().getStackName());
+            System.out.println(response.getCallbackContext().getStackName());
             final ProgressEvent<ResourceModel, CallbackContext> nextResponse = handler.handleRequest(proxy, request, response.getCallbackContext(), logger);
 
             //CREATE_COMPLETE ASSERTS
-//            assertThat(nextResponse).isNotNull();
-//            assertThat(nextResponse.getStatus()).isEqualTo(OperationStatus.SUCCESS);
-//            assertThat(nextResponse.getCallbackDelaySeconds()).isEqualTo(0);
-//            assertThat(nextResponse.getCallbackContext()).isNull();
-//            assertThat(nextResponse.getResourceModel()).isEqualTo(request.getDesiredResourceState());
-//            assertThat(nextResponse.getResourceModels()).isNull();
-//            assertThat(nextResponse.getMessage()).isNull();
-//            assertThat(nextResponse.getErrorCode()).isNull();
+            assertThat(nextResponse).isNotNull();
+            assertThat(nextResponse.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+            assertThat(nextResponse.getCallbackDelaySeconds()).isEqualTo(0);
+            assertThat(nextResponse.getCallbackContext()).isNull();
+            assertThat(nextResponse.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+            assertThat(nextResponse.getResourceModels()).isNull();
+            assertThat(nextResponse.getMessage()).isNull();
+            assertThat(nextResponse.getErrorCode()).isNull();
 
         } catch (Exception e) {
             e.printStackTrace();

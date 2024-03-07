@@ -80,6 +80,7 @@
         "logs:CreateLogStream",
         "logs:DescribeLogGroups",
         "logs:PutMetricData",
+        "logs:PutLogEvents",
         "ssm:GetParameter",
         "ssm:PutParameter",
         "iam:PassRole",
