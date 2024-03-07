@@ -10,6 +10,7 @@ Resources:
   TypeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      MemorySize: 8192
       Handler: software.awsutility.cloudformation.commandrunner.HandlerWrapper::handleRequest
       Runtime: java8.al2
       CodeUri: ./target/awsutility-cloudformation-commandrunner-handler-1.0-SNAPSHOT.jar
@@ -17,6 +18,7 @@ Resources:
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
+      MemorySize: 8192
       Handler: software.awsutility.cloudformation.commandrunner.HandlerWrapper::testEntrypoint
       Runtime: java8.al2
       CodeUri: ./target/awsutility-cloudformation-commandrunner-handler-1.0-SNAPSHOT.jar
