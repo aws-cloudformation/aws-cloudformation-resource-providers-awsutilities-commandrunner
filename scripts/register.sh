@@ -3,7 +3,8 @@
 #  exit
 #fi
 
-region=`aws configure get region`
+#region=`aws configure get region`
+region=`aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]'`
 if [ -z "$region" ]; then
   echo "No region configured, please configure a default region using aws configure."
   exit
