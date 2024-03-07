@@ -73,7 +73,7 @@ Any output written using the command to the reserved file `/command-output.txt` 
 
 ```yaml
 Resources:
-  CommandRunner:
+  MyCommand:
     Type: 'AWSUtility::CloudFormation::CommandRunner'
     Properties:
       Command: aws s3 ls | sed -n 1p | cut -d " " -f3 > /command-output.txt
@@ -89,7 +89,7 @@ Resources:
 Outputs:
     Output:
         Description: The output of the CommandRunner.
-        Value: !GetAtt Command.Output
+        Value: !GetAtt MyCommand.Output
 ```
 *Note: In the above example, `sed -n 1p` prints only the first line from the response returned by `aws s3 ls`. To get the bucket name, `sed -n 1p` pipes the response to `cut -d " " -f3`, which chooses the third element in the array created after splitting the line delimited by a space.*
 
