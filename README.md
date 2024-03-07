@@ -1,5 +1,20 @@
 # AWSUtility::CloudFormation::CommandRunner
 
+### To Compile and Install
+
+Simply run the following commands to compile and install CommandRunner to your AWS account.
+
+```
+git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
+
+cd aws-cloudformation-resource-providers-awsutilities-commandrunner
+
+./scripts/build.sh
+```
+
+For the above, you will need [Maven](https://maven.apache.org/install.html), [Java](https://www.java.com/en/download/help/download_options.html) and the [CFN CLI](https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/what-is-cloudformation-cli.html#resource-type-setup-java) installed. For more information on the installation process and the versions for each, see [Developer Build Steps](#developer-build-steps).
+
+
 ### CommandRunner v2.0 is here! 🚀 🚀 🚀
 
 I took all the feedback, issues and feature requests from all our users to create this new major version. All known bugs for CommandRunner have now been fixed!
@@ -479,6 +494,25 @@ Outputs:
 
 # User Guides
 
+## Run A Multi-Line Script
+
+```yaml
+Resources:
+   CommandRunner:
+      Type: AWSUtility::CloudFormation::CommandRunner
+      Properties:
+         Command:
+            Fn::Sub: |
+                echo "my log"
+                echo '{"key":"value"}' > mydata.json
+                ...
+                <ANY OTHER COMMANDS>
+                ...
+                echo success > /command-output.txt
+         LogGroup: my-cloudwatch-log-group
+         Role: MyEC2InstanceProfile
+```
+
 ## Run A Command Before Or After A Resource
 
 To run the command after a resource with logical name `Resource`, specify `DependsOn: Resource` in the AWSUtility::CloudFormation::CommandRunner resource's definition.
@@ -489,9 +523,9 @@ Resources:
       DependsOn: Resource
       Type: AWSUtility::CloudFormation::CommandRunner
       Properties:
-         Command: aws s3 ls > /command-output.txt
+         Command: echo success > /command-output.txt
          LogGroup: my-cloudwatch-log-group
-         Role: EC2-Role
+         Role: MyEC2InstanceProfile
    Resource:
       Type: AWS::EC2::Instance
       Properties:
@@ -505,9 +539,9 @@ Resources:
    Command:
       Type: AWSUtility::CloudFormation::CommandRunner
       Properties:
-         Command: aws s3 ls > /command-output.txt
+         Command: echo success > /command-output.txt
          LogGroup: my-cloudwatch-log-group
-         Role: EC2-Role
+         Role: MyEC2InstanceProfile
    Resource:
       DependsOn: Command
       Type: AWS::EC2::Instance
@@ -525,7 +559,7 @@ Resources:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
             Command: 'aws s3 cp s3://cfn-cli-project/S3BucketCheck.py . && python S3BucketCheck.py my-bucket third-name-option-a'
-            Role: EC2AdminRole
+            Role: MyEC2InstanceProfile
             LogGroup: my-cloudwatch-log-group
 Outputs:
     Output:
@@ -540,8 +574,31 @@ Resources:
     Command:
         Type: AWSUtility::CloudFormation::CommandRunner
         Properties:
-            Command: 'yum install jq -y && aws ssm get-parameter --name RepositoryName --region us-east-1 | jq -r .Parameter.Value > /command-output.txt'
-            Role: EC2AdminRole
+            Command:
+                Fn::Sub: |
+                    yum install jq -y
+                    aws ssm get-parameter --name RepositoryName --region us-east-1 > response.json
+                    jq -r .Parameter.Value response.json > /command-output.txt'
+            Role: MyEC2InstanceProfile
+            LogGroup: my-cloudwatch-log-group
+Outputs:
+    Output:
+        Description: The output of the command.
+        Value: !GetAtt Command.Output
+```
+
+
+## Using AWSCLI --query option
+
+```yaml
+Resources:
+    Command:
+        Type: AWSUtility::CloudFormation::CommandRunner
+        Properties:
+            Command:
+                Fn::Sub: |
+                    aws ssm get-parameter --name RepositoryName --region us-east-1 --query Parameter.Value --output text > /command-output.txt
+            Role: MyEC2InstanceProfile
             LogGroup: my-cloudwatch-log-group
 Outputs:
     Output:
@@ -602,22 +659,22 @@ Once the script finishes, the AWSUtility::CloudFormation::CommandRunner resource
 
 You can find an example of how to use the resource in the file `usage-template.yaml`.
 
-As of July 2022, the recommended versions and dependencies for the build are as follows.
+As of March 2024, the recommended versions and dependencies for the build are as follows.
 ```
 $ cfn --version
-cfn 0.2.24
+cfn 0.2.35
 
 $ mvn -version
-Apache Maven 3.6.3 (cecedd343002696d0abb50b32b541b8a6ba2883f)
-Maven home: /Users/shantgup/Downloads/mvn
-Java version: 15.0.2, vendor: AdoptOpenJDK, runtime: /Library/Java/JavaVirtualMachines/adoptopenjdk-15.jdk/Contents/Home
+Apache Maven 3.9.6 (bc0240f3c744dd6b6ec2920b3cd08dcc295161ae)
+Maven home: /opt/homebrew/Cellar/maven/3.9.6/libexec
+Java version: 19.0.2, vendor: Oracle Corporation, runtime: /Library/Java/JavaVirtualMachines/jdk-19.jdk/Contents/Home
 Default locale: en_US, platform encoding: UTF-8
-OS name: "mac os x", version: "10.16", arch: "x86_64", family: "mac"
+OS name: "mac os x", version: "14.1.1", arch: "aarch64", family: "mac"
 
 $ java -version
-openjdk version "15.0.2" 2021-01-19
-OpenJDK Runtime Environment AdoptOpenJDK (build 15.0.2+7)
-OpenJDK 64-Bit Server VM AdoptOpenJDK (build 15.0.2+7, mixed mode, sharing)
+java 19.0.2 2023-01-17
+Java(TM) SE Runtime Environment (build 19.0.2+7-44)
+Java HotSpot(TM) 64-Bit Server VM (build 19.0.2+7-44, mixed mode, sharing)
 
 $ ./scripts/build.sh
 ```
