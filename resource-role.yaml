@@ -54,6 +54,7 @@ Resources:
                 - "logs:CreateLogStream"
                 - "logs:DescribeLogGroups"
                 - "logs:PutMetricData"
+                - "logs:PutLogEvents"
                 - "ssm:DeleteParameter"
                 - "ssm:GetParameter"
                 - "ssm:PutParameter"
