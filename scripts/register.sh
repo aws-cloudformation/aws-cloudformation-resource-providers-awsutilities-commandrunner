@@ -3,7 +3,8 @@
 #  exit
 #fi
 
-region=`aws configure get region`
+#region=`aws configure get region`
+region=`aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]'`
 if [ -z "$region" ]; then
   echo "No region configured, please configure a default region using aws configure."
   exit
@@ -56,7 +57,7 @@ stack_progress=`aws cloudformation describe-stacks --stack-name awsutility-cloud
 while [[ $stack_progress == *"IN_PROGRESS" ]]
 do
    echo "Waiting for execution role stack to complete..."
-   sleep 10s
+   sleep 10
    stack_progress=`aws cloudformation describe-stacks --stack-name awsutility-cloudformation-commandrunner-execution-role-stack --query Stacks[0].StackStatus --output text`
    if [[ $stack_progress == "CREATE_COMPLETE" ]] || [[ $stack_progress == "UPDATE_COMPLETE" ]]; then
     echo "Creating/Updating Execution Role complete."
@@ -123,7 +124,7 @@ progress_status="IN_PROGRESS"
 while [[ $progress_status == "IN_PROGRESS" ]]
 do
    echo "Waiting for registration to complete..."
-   sleep 15s
+   sleep 15
    progress_status=`aws cloudformation describe-type-registration --registration-token $registration_token --query ProgressStatus --output text`
    if [[ $progress_status == "COMPLETE" ]]; then
     echo "Registering AWSUtility::CloudFormation::CommandRunner to AWS CloudFormation complete."

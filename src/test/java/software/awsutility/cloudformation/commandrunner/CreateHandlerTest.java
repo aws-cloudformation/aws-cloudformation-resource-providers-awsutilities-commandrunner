@@ -13,7 +13,6 @@ import com.amazonaws.services.simplesystemsmanagement.model.*;
 import com.amazonaws.services.simplesystemsmanagement.model.Parameter;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
-import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,10 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.awsutility.cloudformation.commandrunner.CallbackContext;
-import software.awsutility.cloudformation.commandrunner.CreateHandler;
+import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -46,17 +44,26 @@ public class CreateHandlerTest {
     private Logger logger;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
-        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), any())).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue("ami-1234")));
-        when(proxy.injectCredentialsAndInvoke(any(DescribeVpcsRequest.class), any())).thenReturn(new DescribeVpcsResult().withVpcs(new Vpc().withVpcId("vpc-1234").withIsDefault(Boolean.TRUE)));
-        when(proxy.injectCredentialsAndInvoke(any(DescribeSubnetsRequest.class), any())).thenReturn(new DescribeSubnetsResult().withSubnets(new Subnet().withSubnetId("subnet-1234")));
-        when(proxy.injectCredentialsAndInvoke(any(CreateStackRequest.class), any())).thenReturn(new CreateStackResult());
-        when(proxy.injectCredentialsAndInvoke(any(DescribeStacksRequest.class), any())).thenReturn(new DescribeStacksResult().withStacks(new Stack().withStackStatus(StackStatus.CREATE_COMPLETE).withStackStatusReason("Successful").withOutputs(new Output().withOutputValue("expected-value"))));
-        when(proxy.injectCredentialsAndInvoke(any(DeleteStackRequest.class), any())).thenReturn(new DeleteStackResult());
-        when(proxy.injectCredentialsAndInvoke(any(PutParameterRequest.class), any())).thenReturn(new PutParameterResult());
-        when(proxy.injectCredentialsAndInvoke(any(GetCallerIdentityRequest.class), any())).thenReturn(new GetCallerIdentityResult().withArn("arn:aws:sts::123456789012:assumed-role/my-role-name/my-role-session-name"));
-        when(proxy.injectCredentialsAndInvoke(any(SimulatePrincipalPolicyRequest.class), any())).thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult().withEvalDecision("Allowed")));
+        when(proxy.injectCredentialsAndInvoke(any(GetParameterRequest.class), any(Function.class))).thenReturn(new GetParameterResult().withParameter(new Parameter().withValue("ami-1234")));
+
+        when(proxy.injectCredentialsAndInvoke(any(DescribeVpcsRequest.class), any(Function.class))).thenReturn(new DescribeVpcsResult().withVpcs(new Vpc().withVpcId("vpc-1234").withIsDefault(Boolean.TRUE)));
+
+        when(proxy.injectCredentialsAndInvoke(any(DescribeSubnetsRequest.class), any(Function.class))).thenReturn(new DescribeSubnetsResult().withSubnets(new Subnet().withSubnetId("subnet-1234")));
+
+        when(proxy.injectCredentialsAndInvoke(any(CreateStackRequest.class), any(Function.class))).thenReturn(new CreateStackResult());
+
+        when(proxy.injectCredentialsAndInvoke(any(DescribeStacksRequest.class), any(Function.class))).thenReturn(new DescribeStacksResult().withStacks(new Stack().withStackStatus(StackStatus.CREATE_COMPLETE).withStackStatusReason("Successful").withOutputs(new Output().withOutputValue("expected-value"))));
+
+        when(proxy.injectCredentialsAndInvoke(any(DeleteStackRequest.class), any(Function.class))).thenReturn(new DeleteStackResult());
+
+        when(proxy.injectCredentialsAndInvoke(any(PutParameterRequest.class), any(Function.class))).thenReturn(new PutParameterResult());
+
+        when(proxy.injectCredentialsAndInvoke(any(GetCallerIdentityRequest.class), any(Function.class))).thenReturn(new GetCallerIdentityResult().withArn("arn:aws:sts::123456789012:assumed-role/my-role-name/my-role-session-name"));
+
+        when(proxy.injectCredentialsAndInvoke(any(SimulatePrincipalPolicyRequest.class), any(Function.class))).thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(new EvaluationResult().withEvalDecision("Allowed")));
 
         logger = mock(Logger.class);
     }

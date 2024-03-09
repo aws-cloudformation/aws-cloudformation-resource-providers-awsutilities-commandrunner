@@ -79,7 +79,8 @@
         "cloudformation:DescribeStacks",
         "logs:CreateLogStream",
         "logs:DescribeLogGroups",
-        "logs:PutMetricData",
+        "cloudwatch:PutMetricData",
+        "logs:PutLogEvents",
         "ssm:GetParameter",
         "ssm:PutParameter",
         "iam:PassRole",
@@ -93,7 +94,7 @@
     "read": {
       "permissions": [
         "ssm:GetParameter",
-        "logs:PutMetricData"
+        "cloudwatch:PutMetricData"
       ]
     },
     "delete": {

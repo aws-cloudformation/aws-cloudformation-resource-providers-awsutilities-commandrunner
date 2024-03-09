@@ -15,7 +15,13 @@ Resources:
             Principal:
               Service: resources.cloudformation.amazonaws.com
             Action: sts:AssumeRole
-
+            Condition:
+              StringEquals:
+                aws:SourceAccount:
+                  Ref: AWS::AccountId
+              StringLike:
+                aws:SourceArn:
+                  Fn::Sub: arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:type/resource/AWSUtility-CloudFormation-CommandRunner/*
       Path: "/"
       Policies:
         - PolicyName: ResourceTypePolicy
@@ -27,6 +33,7 @@ Resources:
                 - "cloudformation:CreateStack"
                 - "cloudformation:DeleteStack"
                 - "cloudformation:DescribeStacks"
+                - "cloudwatch:PutMetricData"
                 - "ec2:AuthorizeSecurityGroupEgress"
                 - "ec2:AuthorizeSecurityGroupIngress"
                 - "ec2:CreateSecurityGroup"
@@ -47,8 +54,7 @@ Resources:
                 - "kms:Encrypt"
                 - "logs:CreateLogStream"
                 - "logs:DescribeLogGroups"
-                - "log:PutLogEvents"
-                - "cloudwatch:PutMetricData"
+                - "logs:PutLogEvents"
                 - "ssm:DeleteParameter"
                 - "ssm:GetParameter"
                 - "ssm:PutParameter"
