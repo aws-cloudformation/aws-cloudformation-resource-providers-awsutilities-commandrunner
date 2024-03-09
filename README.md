@@ -668,6 +668,14 @@ $ ./scripts/build.sh
 
 # Change Log
 
+### v2.0.1
+
+* Updated from `java8` to `java8.al2`.
+* Updated README and added more examples.
+* Fixed IAM policy.
+* Fixed `register.sh`.
+* Better region determination in `register.sh`.
+
 ### v2.0
 
 * Updated package versions in pom.xml to latest, fixing build issues related to outdated dependencies.
