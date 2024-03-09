@@ -1,27 +1,12 @@
 # AWSUtility::CloudFormation::CommandRunner
 
-### To Compile and Install
-
-Simply run the following commands to compile and install CommandRunner to your AWS account.
-
-```
-git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
-
-cd aws-cloudformation-resource-providers-awsutilities-commandrunner
-
-./scripts/build.sh
-```
-
-For the above, you will need [Maven](https://maven.apache.org/install.html), [Java](https://www.java.com/en/download/help/download_options.html) and the [CFN CLI](https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/what-is-cloudformation-cli.html#resource-type-setup-java) installed. For more information on the installation process and the versions for each, see [Developer Build Steps](#developer-build-steps).
-
-
-### CommandRunner v2.0 is here! 🚀 🚀 🚀
+### CommandRunner v2.0.1 is here! 🚀 🚀 🚀
 
 I took all the feedback, issues and feature requests from all our users to create this new major version. All known bugs for CommandRunner have now been fixed!
 
 This version comes with 3 new properties `InstanceType`, `Timeout` and `DisableTerminateInstancesCheck`, improved error handling, logging, reliability, documentation and functionality.
 
-To update to the new version, simply run the following commands in a new directory.
+To update to the new version or do a fresh install, simply run the following commands in a new directory.
 
 ```
 git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
