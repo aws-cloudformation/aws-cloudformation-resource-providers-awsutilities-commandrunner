@@ -34,6 +34,7 @@ For more details, check the [Change Log](#change-log) section below.
     - [Run a Command before or after any Resource](#run-a-command-before-or-after-a-resource)
     - [Run a script in any programming language using any SDK](#run-a-script-in-any-programming-language-using-any-sdk)
     - [Install Packages before Running Command](#install-packages-before-running-command)
+    - [Run a Multi-Line Script](#run-a-multi-line-script)
     - [Use Cases](#use-cases)
 - [FAQ](#faq)
 - [Developer Build Steps](#developer-build-steps)
@@ -479,25 +480,6 @@ Outputs:
 
 # User Guides
 
-## Run A Multi-Line Script
-
-```yaml
-Resources:
-   CommandRunner:
-      Type: AWSUtility::CloudFormation::CommandRunner
-      Properties:
-         Command:
-            Fn::Sub: |
-                echo "my log"
-                echo '{"key":"value"}' > mydata.json
-                ...
-                <ANY OTHER COMMANDS>
-                ...
-                echo success > /command-output.txt
-         LogGroup: my-cloudwatch-log-group
-         Role: MyEC2InstanceProfile
-```
-
 ## Run A Command Before Or After A Resource
 
 To run the command after a resource with logical name `Resource`, specify `DependsOn: Resource` in the AWSUtility::CloudFormation::CommandRunner resource's definition.
@@ -589,6 +571,25 @@ Outputs:
     Output:
         Description: The output of the command.
         Value: !GetAtt Command.Output
+```
+
+## Run A Multi-Line Script
+
+```yaml
+Resources:
+   CommandRunner:
+      Type: AWSUtility::CloudFormation::CommandRunner
+      Properties:
+         Command:
+            Fn::Sub: |
+                echo "my log"
+                echo '{"key":"value"}' > mydata.json
+                ...
+                <ANY OTHER COMMANDS>
+                ...
+                echo success > /command-output.txt
+         LogGroup: my-cloudwatch-log-group
+         Role: MyEC2InstanceProfile
 ```
 
 # Use Cases
