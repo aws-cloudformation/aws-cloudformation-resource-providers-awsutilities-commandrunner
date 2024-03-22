@@ -1,27 +1,12 @@
 # AWSUtility::CloudFormation::CommandRunner
 
-### To Compile and Install
-
-Simply run the following commands to compile and install CommandRunner to your AWS account.
-
-```
-git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
-
-cd aws-cloudformation-resource-providers-awsutilities-commandrunner
-
-./scripts/build.sh
-```
-
-For the above, you will need [Maven](https://maven.apache.org/install.html), [Java](https://www.java.com/en/download/help/download_options.html) and the [CFN CLI](https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/what-is-cloudformation-cli.html#resource-type-setup-java) installed. For more information on the installation process and the versions for each, see [Developer Build Steps](#developer-build-steps).
-
-
-### CommandRunner v2.0 is here! 🚀 🚀 🚀
+### CommandRunner v2.0.1 is here! 🚀 🚀 🚀
 
 I took all the feedback, issues and feature requests from all our users to create this new major version. All known bugs for CommandRunner have now been fixed!
 
 This version comes with 3 new properties `InstanceType`, `Timeout` and `DisableTerminateInstancesCheck`, improved error handling, logging, reliability, documentation and functionality.
 
-To update to the new version, simply run the following commands in a new directory.
+To update to the new version or do a fresh install, simply run the following commands in a new directory.
 
 ```
 git clone https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-awsutilities-commandrunner.git
@@ -49,6 +34,7 @@ For more details, check the [Change Log](#change-log) section below.
     - [Run a Command before or after any Resource](#run-a-command-before-or-after-a-resource)
     - [Run a script in any programming language using any SDK](#run-a-script-in-any-programming-language-using-any-sdk)
     - [Install Packages before Running Command](#install-packages-before-running-command)
+    - [Run a Multi-Line Script](#run-a-multi-line-script)
     - [Use Cases](#use-cases)
 - [FAQ](#faq)
 - [Developer Build Steps](#developer-build-steps)
@@ -494,25 +480,6 @@ Outputs:
 
 # User Guides
 
-## Run A Multi-Line Script
-
-```yaml
-Resources:
-   CommandRunner:
-      Type: AWSUtility::CloudFormation::CommandRunner
-      Properties:
-         Command:
-            Fn::Sub: |
-                echo "my log"
-                echo '{"key":"value"}' > mydata.json
-                ...
-                <ANY OTHER COMMANDS>
-                ...
-                echo success > /command-output.txt
-         LogGroup: my-cloudwatch-log-group
-         Role: MyEC2InstanceProfile
-```
-
 ## Run A Command Before Or After A Resource
 
 To run the command after a resource with logical name `Resource`, specify `DependsOn: Resource` in the AWSUtility::CloudFormation::CommandRunner resource's definition.
@@ -606,6 +573,25 @@ Outputs:
         Value: !GetAtt Command.Output
 ```
 
+## Run A Multi-Line Script
+
+```yaml
+Resources:
+   CommandRunner:
+      Type: AWSUtility::CloudFormation::CommandRunner
+      Properties:
+         Command:
+            Fn::Sub: |
+                echo "my log"
+                echo '{"key":"value"}' > mydata.json
+                ...
+                <ANY OTHER COMMANDS>
+                ...
+                echo success > /command-output.txt
+         LogGroup: my-cloudwatch-log-group
+         Role: MyEC2InstanceProfile
+```
+
 # Use Cases
 
 - The AWSUtility::CloudFormation::CommandRunner resource lets you perform any API call, script, custom logic, external check, conditions, cleanup, dynamic parameter retrieval and anything else that can be done using a command.
@@ -682,6 +668,14 @@ $ ./scripts/build.sh
 ---
 
 # Change Log
+
+### v2.0.1
+
+* Updated from `java8` to `java8.al2`.
+* Updated README and added more examples.
+* Fixed IAM policy.
+* Fixed `register.sh`.
+* Better region determination in `register.sh`.
 
 ### v2.0
 
